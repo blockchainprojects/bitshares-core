@@ -99,6 +99,10 @@ namespace graphene { namespace app {
        {
           _crypto_api = std::make_shared< crypto_api >();
        }
+       else if( api_name == "mobile_api" )
+       {
+          _mobile_api = std::make_shared< graphene::mobile::mobile_api >( std::ref(_app) );
+       }
        else if( api_name == "asset_api" )
        {
           _asset_api = std::make_shared< asset_api >( std::ref( *_app.chain_database() ) );
@@ -281,6 +285,12 @@ namespace graphene { namespace app {
     {
        FC_ASSERT(_debug_api);
        return *_debug_api;
+    }
+
+    fc::api<graphene::mobile::mobile_api> login_api::mobile() const
+    {
+       FC_ASSERT(_mobile_api);
+       return *_mobile_api;
     }
 
     vector<order_history_object> history_api::get_fill_order_history( asset_id_type a, asset_id_type b, uint32_t limit  )const

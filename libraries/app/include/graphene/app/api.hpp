@@ -33,6 +33,7 @@
 #include <graphene/grouped_orders/grouped_orders_plugin.hpp>
 
 #include <graphene/debug_witness/debug_api.hpp>
+#include <graphene/mobile/mobile_api.hpp>
 
 #include <graphene/net/node.hpp>
 
@@ -541,6 +542,8 @@ namespace graphene { namespace app {
          fc::api<orders_api> orders()const;
          /// @brief Retrieve the debug API (if available)
          fc::api<graphene::debug_witness::debug_api> debug()const;
+         /// @brief Retrieve the mobile API
+         fc::api<graphene::mobile::mobile_api> mobile()const;
 
          /// @brief Called to enable an API, not reflected.
          void enable_api( const string& api_name );
@@ -556,6 +559,7 @@ namespace graphene { namespace app {
          optional< fc::api<asset_api> > _asset_api;
          optional< fc::api<orders_api> > _orders_api;
          optional< fc::api<graphene::debug_witness::debug_api> > _debug_api;
+         optional< fc::api<graphene::mobile::mobile_api> > _mobile_api;
    };
 
 }}  // graphene::app
@@ -631,4 +635,5 @@ FC_API(graphene::app::login_api,
        (asset)
        (orders)
        (debug)
+       (mobile)
      )
