@@ -45,6 +45,10 @@ public:
    void_result do_apply( const account_update_operation& o );
 
    const account_object* acnt;
+
+private:
+   // cache for delta voting
+   fc::optional<account_options> _account_options;
 };
 
 class account_upgrade_evaluator : public evaluator<account_upgrade_evaluator>

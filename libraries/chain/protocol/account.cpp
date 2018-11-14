@@ -248,8 +248,26 @@ void account_update_operation::validate()const
       FC_ASSERT( !active->is_impossible(), "cannot update an account with an imposible active authority threshold" );
    }
 
-   if( new_options )
-      new_options->validate();
+   const auto& ext_val = extensions.value;
+   if( new_options ) {
+       FC_ASSERT( !ext_val.num_committee.valid() 
+               && !ext_val.num_witness.valid() 
+               && !ext_val.votes_to_add.valid() 
+               && !ext_val.votes_to_remove.valid()
+               && !ext_val.voting_account.valid(),
+               "delta-voting is forbidden when new_options is set"
+               );
+       new_options->validate();
+   }
+
+   if( ext_val.votes_to_add.valid() && ext_val.votes_to_remove.valid() )
+   {
+       for( const auto& id : *ext_val.votes_to_add ) {
+           FC_ASSERT( (*ext_val.votes_to_remove).find(id) == (*ext_val.votes_to_remove).end(),
+              "cannot add and remove votes at the same time", ("id", id) );
+       }
+   }
+      
    if( extensions.value.owner_special_authority.valid() )
       validate_special_authority( *extensions.value.owner_special_authority );
    if( extensions.value.active_special_authority.valid() )

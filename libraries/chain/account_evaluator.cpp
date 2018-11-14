@@ -305,8 +305,38 @@ void_result account_update_evaluator::do_evaluate( const account_update_operatio
 
    acnt = &o.account(d);
 
-   if( o.new_options.valid() )
+   const auto& ext_val = o.extensions.value;
+   if( o.new_options.valid() ) 
+   {
       verify_account_votes( d, *o.new_options );
+   } 
+   else if( ext_val.num_committee.valid() || ext_val.num_witness.valid() 
+         || ext_val.votes_to_add.valid() || ext_val.votes_to_remove.valid()
+         || ext_val.voting_account.valid() ) // if delta voting active
+   {
+      // copy the current state of the account_options
+      _account_options = acnt->options;
+      
+      // set new voting account
+      if( ext_val.voting_account.valid() )
+         (*_account_options).voting_account = *ext_val.voting_account;
+
+      // erase and add the votes
+      if( ext_val.votes_to_remove.valid() )
+         for(const auto& id : *ext_val.votes_to_remove ) (*_account_options).votes.erase(id);
+      if( ext_val.votes_to_add.valid() )
+         for(const auto& id : *ext_val.votes_to_add ) (*_account_options).votes.insert(id);
+
+      // set num_commitee and num_witness
+      if( ext_val.num_witness.valid() )
+         (*_account_options).num_witness = *ext_val.num_witness;
+      if( ext_val.num_committee.valid() )
+         (*_account_options).num_committee = *ext_val.num_committee;
+
+      // validate here because values were fetched before
+      (*_account_options).validate();
+      verify_account_votes( d, *_account_options );
+   }
 
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (o) ) }
@@ -318,7 +348,8 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
    bool sa_before = acnt->has_special_authority();
 
    // update account statistics
-   if( o.new_options.valid() && o.new_options->is_voting() != acnt->options.is_voting() )
+   if( ( o.new_options.valid() && o.new_options->is_voting() != acnt->options.is_voting() ) 
+    || ( _account_options.valid() && _account_options->is_voting() != acnt->options.is_voting() ) )
    {
       d.modify( acnt->statistics( d ), []( account_statistics_object& aso )
       {
@@ -327,7 +358,7 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
    }
 
    // update account object
-   d.modify( *acnt, [&o](account_object& a){
+   d.modify( *acnt, [&o, this](account_object& a){
       if( o.owner )
       {
          a.owner = *o.owner;
@@ -338,7 +369,14 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
          a.active = *o.active;
          a.top_n_control_flags = 0;
       }
-      if( o.new_options ) a.options = *o.new_options;
+      if( o.new_options ) 
+      {
+          a.options = *o.new_options;
+      }
+      else if( _account_options )
+      {
+          a.options = *_account_options;
+      }
       if( o.extensions.value.owner_special_authority.valid() )
       {
          a.owner_special_authority = *(o.extensions.value.owner_special_authority);
