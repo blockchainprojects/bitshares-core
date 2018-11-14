@@ -305,36 +305,34 @@ void_result account_update_evaluator::do_evaluate( const account_update_operatio
 
    acnt = &o.account(d);
 
-   const auto& ext_val = o.extensions.value;
+   const auto& delta_opts = o.extensions.value.delta_voting_options;
    if( o.new_options.valid() ) 
    {
       verify_account_votes( d, *o.new_options );
    } 
-   else if( ext_val.num_committee.valid() || ext_val.num_witness.valid() 
-         || ext_val.votes_to_add.valid() || ext_val.votes_to_remove.valid()
-         || ext_val.voting_account.valid() ) // if delta voting active
+   else if( delta_opts.valid() ) // if delta voting active
    {
       // copy the current state of the account_options
       _account_options = acnt->options;
       
       // set new voting account
-      if( ext_val.voting_account.valid() )
-         (*_account_options).voting_account = *ext_val.voting_account;
+      if( delta_opts->voting_account.valid() )
+         _account_options->voting_account = *delta_opts->voting_account;
 
       // erase and add the votes
-      if( ext_val.votes_to_remove.valid() )
-         for(const auto& id : *ext_val.votes_to_remove ) (*_account_options).votes.erase(id);
-      if( ext_val.votes_to_add.valid() )
-         for(const auto& id : *ext_val.votes_to_add ) (*_account_options).votes.insert(id);
+      if( delta_opts->votes_to_remove.valid() )
+         for(const auto& id : *delta_opts->votes_to_remove ) _account_options->votes.erase(id);
+      if( delta_opts->votes_to_add.valid() )
+         for(const auto& id : *delta_opts->votes_to_add ) _account_options->votes.insert(id);
 
       // set num_commitee and num_witness
-      if( ext_val.num_witness.valid() )
-         (*_account_options).num_witness = *ext_val.num_witness;
-      if( ext_val.num_committee.valid() )
-         (*_account_options).num_committee = *ext_val.num_committee;
+      if( delta_opts->num_witness.valid() )
+         _account_options->num_witness = *delta_opts->num_witness;
+      if( delta_opts->num_committee.valid() )
+         _account_options->num_committee = *delta_opts->num_committee;
 
       // validate here because values were fetched before
-      (*_account_options).validate();
+      _account_options->validate();
       verify_account_votes( d, *_account_options );
    }
 

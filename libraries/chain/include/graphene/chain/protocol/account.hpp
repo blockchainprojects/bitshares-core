@@ -125,16 +125,21 @@ namespace graphene { namespace chain {
     */
    struct account_update_operation : public base_operation
    {
+      struct delta_voting_opts
+      {
+         optional< account_id_type > voting_account;  
+         optional< uint16_t >        num_witness;     
+         optional< uint16_t >        num_committee;
+         optional< flat_set<vote_id_type> > votes_to_add;
+         optional< flat_set<vote_id_type> > votes_to_remove;
+      };
+      
       struct ext
       {
          optional< void_t >            null_ext;
          optional< special_authority > owner_special_authority;
          optional< special_authority > active_special_authority;
-         optional< uint16_t >          num_witness;     
-         optional< uint16_t >          num_committee;
-         optional< flat_set<vote_id_type> > votes_to_add;
-         optional< flat_set<vote_id_type> > votes_to_remove;
-         optional< account_id_type >   voting_account;
+         optional< delta_voting_opts > delta_voting_options;
       };
 
       struct fee_parameters_type
@@ -286,9 +291,8 @@ FC_REFLECT( graphene::chain::account_create_operation,
             (name)(owner)(active)(options)(extensions)
           )
 
-FC_REFLECT(graphene::chain::account_update_operation::ext, (null_ext)(owner_special_authority)(active_special_authority)
-           (num_witness)(num_committee)(votes_to_add)(votes_to_remove)(voting_account)
-          )
+FC_REFLECT(graphene::chain::account_update_operation::ext, (null_ext)(owner_special_authority)(active_special_authority)(delta_voting_options) )
+FC_REFLECT(graphene::chain::account_update_operation::delta_voting_opts, (voting_account)(num_witness)(num_committee)(votes_to_add)(votes_to_remove) )
 FC_REFLECT_TYPENAME(graphene::chain::extension<graphene::chain::account_update_operation::ext>)
 FC_REFLECT( graphene::chain::account_update_operation,
             (fee)(account)(owner)(active)(new_options)(extensions)
