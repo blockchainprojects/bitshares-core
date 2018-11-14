@@ -130,6 +130,10 @@ namespace graphene { namespace chain {
          optional< void_t >            null_ext;
          optional< special_authority > owner_special_authority;
          optional< special_authority > active_special_authority;
+         optional< uint16_t >          num_witness;         // for delta-voting
+         optional< uint16_t >          num_committee;       // for delta-voting
+         optional< flat_set<vote_id_type> > votes_to_add;   // for delta-voting
+         optional< flat_set<vote_id_type> > votes_to_remove;// for delta-voting
       };
 
       struct fee_parameters_type
@@ -281,7 +285,9 @@ FC_REFLECT( graphene::chain::account_create_operation,
             (name)(owner)(active)(options)(extensions)
           )
 
-FC_REFLECT(graphene::chain::account_update_operation::ext, (null_ext)(owner_special_authority)(active_special_authority) )
+FC_REFLECT(graphene::chain::account_update_operation::ext, (null_ext)(owner_special_authority)(active_special_authority)
+           (num_witness)(num_committee)(votes_to_add)(votes_to_remove)
+          )
 FC_REFLECT_TYPENAME(graphene::chain::extension<graphene::chain::account_update_operation::ext>)
 FC_REFLECT( graphene::chain::account_update_operation,
             (fee)(account)(owner)(active)(new_options)(extensions)
