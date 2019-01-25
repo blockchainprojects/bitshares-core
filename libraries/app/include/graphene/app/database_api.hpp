@@ -721,10 +721,10 @@ class database_api
    
       /**
        *  @brief Get custom authorities objects for account id.
-       *  @param account Account id for which custom authorities should be fetched.
+       *  @param account Account ID or name to get objects from
        *  @return Custom authorities objects for the account
        */
-      vector<custom_authority_object> get_custom_authorities_by_account(account_id_type account)const;
+      vector<custom_authority_object> get_custom_authorities_by_account(const std::string account_id_or_name)const;
 
    private:
       std::shared_ptr< database_api_impl > my;
