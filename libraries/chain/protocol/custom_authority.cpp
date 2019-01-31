@@ -130,11 +130,12 @@ void custom_authority_update_operation::validate()const
               && account != GRAPHENE_RELAXED_COMMITTEE_ACCOUNT,
               "Can not create custom authority for special accounts" );
    
-   FC_ASSERT( valid_from < valid_to, "valid_from must be earlier than valid_to" );
-   
-   for( const auto& r : restrictions )
+   if ( restrictions )
    {
-      operation_type_from_operation_id(operation_type, operation_type_checker(r));
+      for( const auto& r : *restrictions )
+      {
+         operation_type_from_operation_id(*operation_type, operation_type_checker(r));
+      }
    }
 }
 

@@ -40,8 +40,6 @@
 
 #include <fc/smart_ref_impl.hpp>
 
-#include <iostream>
-
 namespace graphene { namespace chain {
 
 namespace {
@@ -65,7 +63,10 @@ namespace {
       
       flat_set<account_id_type> active_accounts;
       flat_set<account_id_type> owner_accounts;
-      vector<authority>  other_authorities;
+      
+      //it is need only as argument for operation_get_required_authorities() function
+      //we won't use it anyhow
+      vector<authority> other_authorities;
       
       operation_get_required_authorities(op, active_accounts, owner_accounts, other_authorities);
       

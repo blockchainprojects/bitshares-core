@@ -215,13 +215,13 @@ inline int64_t to_integer(const unordered_map<K, T>& value)
 template <typename T>
 void is_type_supported_by_restriction()
 {
-   FC_THROW("Type is not supprted by restruction. Typename = ${name}", ("name", fc::get_typename<T>::name()));
+   FC_THROW("Type is not supported by restriction. Typename = ${name}", ("name", fc::get_typename<T>::name()));
 }
    
 template <class T>
 bool is_equal(const T& left, const T& right)
 {
-   FC_THROW("Can't compare types. Type '${type_name}' don't support == operator.", ("type_name", fc::get_typename<T>::name()));
+   FC_THROW("Can't compare types. Type '${type_name}' doesn't support == operator.", ("type_name", fc::get_typename<T>::name()));
 }
    
 template <typename T>

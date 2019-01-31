@@ -32,7 +32,8 @@ namespace graphene { namespace chain {
 
 void_result custom_authority_create_evaluator::do_evaluate(const custom_authority_create_operation& op)
 { try {
-   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME, "custom_authority_create_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
+             "custom_authority_create_operation should not be executed before HARDFORK_CORE_1285_TIME");
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
@@ -55,7 +56,8 @@ object_id_type custom_authority_create_evaluator::do_apply(const custom_authorit
 
 void_result custom_authority_update_evaluator::do_evaluate(const custom_authority_update_operation& op)
 { try {
-   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME, "custom_authority_update_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
+             "custom_authority_update_operation should not be executed before HARDFORK_CORE_1285_TIME");
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
@@ -64,12 +66,28 @@ void_result custom_authority_update_evaluator::do_apply(const custom_authority_u
    database& d = db();
    
    d.modify( d.get<custom_authority_object>(op.custom_authority_to_update), [&]( custom_authority_object& obj ){
-      obj.account        = op.account;
-      obj.enabled        = op.enabled;
-      obj.valid_from     = op.valid_from;
-      obj.valid_to       = op.valid_to;
-      obj.operation_type = op.operation_type;
-      obj.restrictions   = op.restrictions;
+      
+      obj.account = op.account;
+      
+      if (op.enabled)
+      {
+         obj.enabled = *op.enabled;
+      }
+      
+      if (op.valid_to)
+      {
+         obj.valid_to = *op.valid_to;
+      }
+      
+      if (op.operation_type)
+      {
+         obj.operation_type = *op.operation_type;
+      }
+      
+      if (op.restrictions)
+      {
+         obj.restrictions = *op.restrictions;
+      }
    });
    
    return void_result();
@@ -77,7 +95,8 @@ void_result custom_authority_update_evaluator::do_apply(const custom_authority_u
 
 void_result custom_authority_delete_evaluator::do_evaluate(const custom_authority_delete_operation& op)
 { try {
-   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME, "custom_authority_delete_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
+             "custom_authority_delete_operation should not be executed before HARDFORK_CORE_1285_TIME");
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
@@ -86,7 +105,7 @@ void_result custom_authority_delete_evaluator::do_apply(const custom_authority_d
    database& d = db();
 
    d.remove(d.get<custom_authority_object>(op.custom_authority_to_update));
-   
+
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 

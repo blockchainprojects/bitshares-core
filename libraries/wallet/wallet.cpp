@@ -1204,11 +1204,10 @@ public:
    } FC_CAPTURE_AND_RETHROW ( (account) ) }
    
    signed_transaction update_custom_authority(object_id_type auth,
-                                              int operation_type,
-                                              bool enabled,
-                                              time_point_sec valid_from,
-                                              time_point_sec valid_to,
-                                              vector<restriction_v2> restrictions)
+                                              optional<int> operation_type,
+                                              optional<bool> enabled,
+                                              optional<time_point_sec> valid_to,
+                                              optional<vector<restriction_v2>> restrictions)
    { try {
       custom_authority_update_operation op;
       op.custom_authority_to_update = auth;
@@ -3511,11 +3510,10 @@ vector<custom_authority_object> wallet_api::list_custom_authorities(account_id_t
 }
 
 signed_transaction wallet_api::update_custom_authority(object_id_type auth,
-                                                       int operation_type,
-                                                       bool enabled,
-                                                       time_point_sec valid_from,
-                                                       time_point_sec valid_to,
-                                                       vector<restriction_v2> restrictions)
+                                                       optional<int> operation_type,
+                                                       optional<bool> enabled,
+                                                       optional<time_point_sec> valid_to,
+                                                       optional<vector<restriction_v2>> restrictions)
 {
    return my->update_custom_authority(auth, operation_type, enabled, valid_from, valid_to, restrictions);
 }

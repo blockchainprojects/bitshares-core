@@ -869,11 +869,10 @@ class wallet_api
        * @returns the signed transaction updating custom authority
        */
       signed_transaction update_custom_authority(object_id_type auth,
-                                                 int operation_type,
-                                                 bool enabled,
-                                                 time_point_sec valid_from,
-                                                 time_point_sec valid_to,
-                                                 vector<restriction_v2> restrictions);
+                                                 optional<int> operation_type,
+                                                 optional<bool enabled,
+                                                 optional<time_point_sec> valid_from,
+                                                 optional<vector<restriction_v2>> restrictions);
    
       /**
        * Deletes custom authority specified by id

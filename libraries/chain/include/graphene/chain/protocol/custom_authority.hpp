@@ -72,11 +72,10 @@ namespace graphene { namespace chain {
       asset                           fee;
       account_id_type                 account;
       
-      bool                            enabled;
-      time_point_sec                  valid_from;
-      time_point_sec                  valid_to;
-      unsigned_int                    operation_type;
-      vector<restriction_v2>          restrictions;
+      optional<bool>                   enabled;
+      optional<time_point_sec>         valid_to;
+      optional<unsigned_int>           operation_type;
+      optional<vector<restriction_v2>> restrictions;
       
       uint64_t                        delta_units; // to calculate fee, it will be validated in evaluator
                                                    // Note: if start was in the past, when updating, used fee should be deducted
@@ -97,7 +96,7 @@ namespace graphene { namespace chain {
    {
       struct fee_parameters_type { uint64_t fee =  GRAPHENE_BLOCKCHAIN_PRECISION; };
 
-      object_id_type custom_authority_to_update;
+      object_id_type custom_authority_to_delete;
       
       asset fee;
       account_id_type account;
@@ -124,11 +123,10 @@ FC_REFLECT( graphene::chain::custom_authority_create_operation,
           )
 
 FC_REFLECT( graphene::chain::custom_authority_update_operation,
-            (custom_authority_to_update)
             (fee)
+            (custom_authority_to_update)
             (account)
             (enabled)
-            (valid_from)
             (valid_to)
             (operation_type)
             (restrictions)
@@ -136,7 +134,7 @@ FC_REFLECT( graphene::chain::custom_authority_update_operation,
            )
 
 FC_REFLECT( graphene::chain::custom_authority_delete_operation,
-            (custom_authority_to_update)
             (fee)
+            (custom_authority_to_delete)
             (account)
            )

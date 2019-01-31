@@ -320,7 +320,7 @@ void_result account_update_evaluator::do_evaluate( const account_update_operatio
 
    if( o.new_options.valid() )
       verify_account_votes( d, *o.new_options );
-   
+
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (o) ) }
 
@@ -381,6 +381,8 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
       } );
    }
    
+   //custom authorities should be disabled when active authority of the account is updated
+   //according to https://github.com/bitshares/bsips/blob/master/bsip-0040.md#modification-to-the-backend
    bool custom_authorities_should_be_disabled = o.active.valid();
    if( custom_authorities_should_be_disabled && d.head_block_time() > HARDFORK_CORE_1285_TIME )
    {
