@@ -27,7 +27,7 @@
 namespace graphene { namespace chain {
    
 #define GRAPHENE_GENERATE_OP_TYPE_TO_ID_MAPPER(r, data, i, elem) \
-const int operation_type_id_from_operation_type<elem>::value; \
+const int int_from_operation_type<elem>::value; \
 
 
 BOOST_PP_SEQ_FOR_EACH_I( GRAPHENE_GENERATE_OP_TYPE_TO_ID_MAPPER, , BOOST_PP_VARIADIC_TO_SEQ( GRAPHENE_OPERATIONS_VARIADIC ) )

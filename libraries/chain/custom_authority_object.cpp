@@ -74,7 +74,7 @@ namespace  {
       template <class Operation>
       int operator () ( const Operation& )
       {
-         return operation_type_id_from_operation_type<Operation>::value;
+         return int_from_operation_type<Operation>::value;
       }
    };
    

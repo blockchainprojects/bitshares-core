@@ -58,6 +58,10 @@ void_result custom_authority_update_evaluator::do_evaluate(const custom_authorit
 { try {
    FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
              "custom_authority_update_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   
+   //check if object exists
+   db().get<custom_authority_object>(op.custom_authority_to_update);
+   
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
@@ -97,6 +101,10 @@ void_result custom_authority_delete_evaluator::do_evaluate(const custom_authorit
 { try {
    FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
              "custom_authority_delete_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   
+   //check if object exists
+   db().get<custom_authority_object>(op.custom_authority_to_delete);
+   
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 

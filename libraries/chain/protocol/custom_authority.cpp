@@ -105,7 +105,7 @@ void custom_authority_create_operation::validate()const
    
    for( const auto& r : restrictions )
    {
-      operation_type_from_operation_id(operation_type, operation_type_checker(r));
+      operation_type_from_int(operation_type, operation_type_checker(r));
    }
 }
 
@@ -134,7 +134,7 @@ void custom_authority_update_operation::validate()const
    {
       for( const auto& r : *restrictions )
       {
-         operation_type_from_operation_id(*operation_type, operation_type_checker(r));
+         operation_type_from_int(*operation_type, operation_type_checker(r));
       }
    }
 }

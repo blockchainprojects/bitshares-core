@@ -31,14 +31,14 @@
 namespace graphene { namespace chain {
 
 template <typename OperationType>
-struct operation_type_id_from_operation_type
+struct int_from_operation_type
 {
    static const int value = -1;
 };
 
 #define GRAPHENE_GENERATE_OP_TYPE_TO_ID_MAPPER(r, data, i, elem) \
 template <> \
-struct operation_type_id_from_operation_type<elem> \
+struct int_from_operation_type<elem> \
 { \
    static const int value = i; \
 }; \
@@ -49,14 +49,14 @@ BOOST_PP_SEQ_FOR_EACH_I( GRAPHENE_GENERATE_OP_TYPE_TO_ID_MAPPER, , BOOST_PP_VARI
 #undef GRAPHENE_GENERATE_OP_TYPE_TO_ID_MAPPER
 
 template <typename Action>
-void operation_type_from_operation_id(const int operation_type_id, const Action& action)
+void operation_type_from_int(const int num, const Action& action)
 {
 #define GRAPHENE_GENERATE_OP_ID_TO_TYPE_MAPPER(r, data, i, elem) \
       case i: \
          action.template operator()<elem>(); \
          break;
    
-   switch (operation_type_id)
+   switch (num)
    {
          BOOST_PP_SEQ_FOR_EACH_I( GRAPHENE_GENERATE_OP_ID_TO_TYPE_MAPPER, , BOOST_PP_VARIADIC_TO_SEQ( GRAPHENE_OPERATIONS_VARIADIC ) )
    }

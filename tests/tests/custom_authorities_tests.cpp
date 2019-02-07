@@ -39,10 +39,10 @@ BOOST_AUTO_TEST_CASE( validation_for_correct_operation_name_is_passed )
 {
    custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    BOOST_CHECK(auth.validate(transfer_operation(), time_point_sec(0)));
    
-   auth.operation_type = operation_type_id_from_operation_type<asset_create_operation>::value;
+   auth.operation_type = int_from_operation_type<asset_create_operation>::value;
    BOOST_CHECK(auth.validate(asset_create_operation(), time_point_sec(0)));
 }
 
@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE( validation_for_wrong_operation_name_is_failed )
 {
    custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<asset_create_operation>::value;
+   auth.operation_type = int_from_operation_type<asset_create_operation>::value;
    BOOST_CHECK(!auth.validate(transfer_operation(), time_point_sec(0)));
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    BOOST_CHECK(!auth.validate(asset_create_operation(), time_point_sec(0)));
 }
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE( validation_fails_when_now_is_after_valid_period )
 {
    custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    auth.valid_from = time_point_sec(0);
    auth.valid_to = time_point_sec(5);
    BOOST_CHECK(!auth.validate(transfer_operation(), time_point_sec(6)));
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( validation_fails_when_now_is_before_valid_period )
 {
    graphene::chain::custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    auth.valid_from = time_point_sec(3);
    auth.valid_to = time_point_sec(5);
    BOOST_CHECK(!auth.validate(transfer_operation(), time_point_sec(1)));
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( validation_passes_when_now_is_in_valid_period )
 {
    custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    auth.valid_from = time_point_sec(3);
    auth.valid_to = time_point_sec(5);
    BOOST_CHECK(auth.validate(transfer_operation(), time_point_sec(4)));
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( validation_passes_when_no_restrictions_for_operation_argum
 {
    custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    auth.valid_from = time_point_sec(3);
    auth.valid_to = time_point_sec(5);
    
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( validation_passes_when_one_restriction_passes_for_operatio
 {
    custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    auth.valid_from = time_point_sec(3);
    auth.valid_to = time_point_sec(5);
    
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE( validation_passes_when_several_restriction_passes_for_oper
 {
    custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    auth.valid_from = time_point_sec(3);
    auth.valid_to = time_point_sec(5);
    
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( validation_fails_when_one_restriction_fails_for_operation_
 {
    custom_authority_object auth;
    
-   auth.operation_type = operation_type_id_from_operation_type<transfer_operation>::value;
+   auth.operation_type = int_from_operation_type<transfer_operation>::value;
    auth.valid_from = time_point_sec(3);
    auth.valid_to = time_point_sec(5);
    
@@ -653,8 +653,8 @@ BOOST_AUTO_TEST_CASE( to_integer_custom_type_to_int_throws_exception )
 
 BOOST_AUTO_TEST_CASE( operation_type_id_mapped_from_operation_type )
 {
-   BOOST_CHECK_EQUAL(5, operation_type_id_from_operation_type<account_create_operation>::value);
-   BOOST_CHECK_EQUAL(36, operation_type_id_from_operation_type<assert_operation>::value);
+   BOOST_CHECK_EQUAL(5, int_from_operation_type<account_create_operation>::value);
+   BOOST_CHECK_EQUAL(36, int_from_operation_type<assert_operation>::value);
 }
 
 template <typename Operation>
@@ -669,8 +669,8 @@ struct operation_type_checker
 
 BOOST_AUTO_TEST_CASE( operation_type_mapped_from_operation_id )
 {
-   operation_type_from_operation_id(36, operation_type_checker<assert_operation>());
-   operation_type_from_operation_id(5, operation_type_checker<account_create_operation>());
+   operation_type_from_int(36, operation_type_checker<assert_operation>());
+   operation_type_from_int(5, operation_type_checker<account_create_operation>());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

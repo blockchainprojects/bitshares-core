@@ -33,3 +33,4 @@
 #include "db_update.cpp"
 #include "db_witness_schedule.cpp"
 #include "db_notify.cpp"
+#include "db_custom_auth.cpp"
