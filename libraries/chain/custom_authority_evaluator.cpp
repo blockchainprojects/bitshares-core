@@ -104,7 +104,7 @@ void_result custom_authority_delete_evaluator::do_apply(const custom_authority_d
 { try {
    database& d = db();
 
-   d.remove(d.get<custom_authority_object>(op.custom_authority_to_update));
+   d.remove(d.get<custom_authority_object>(op.custom_authority_to_delete));
 
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }

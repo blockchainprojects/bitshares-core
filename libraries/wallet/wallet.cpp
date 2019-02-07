@@ -1200,11 +1200,11 @@ public:
       
    vector<custom_authority_object> list_custom_authorities(account_id_type account)
    { try {
-      return _remote_db->get_custom_authorities_by_account(account);
+      return _remote_db->get_custom_authorities_by_account(fc::variant(account, 1).as<string>(1));
    } FC_CAPTURE_AND_RETHROW ( (account) ) }
    
    signed_transaction update_custom_authority(object_id_type auth,
-                                              optional<int> operation_type,
+                                              optional<unsigned_int> operation_type,
                                               optional<bool> enabled,
                                               optional<time_point_sec> valid_to,
                                               optional<vector<restriction_v2>> restrictions)
@@ -1212,7 +1212,6 @@ public:
       custom_authority_update_operation op;
       op.custom_authority_to_update = auth;
       op.enabled = enabled;
-      op.valid_from = valid_from;
       op.valid_to = valid_to;
       op.operation_type = operation_type;
       op.restrictions = restrictions;
@@ -1228,7 +1227,7 @@ public:
    signed_transaction delete_custom_authority(object_id_type auth)
    { try {
       custom_authority_delete_operation op;
-      op.custom_authority_to_update = auth;
+      op.custom_authority_to_delete = auth;
       
       signed_transaction tx;
       tx.operations = {op};
@@ -3510,12 +3509,12 @@ vector<custom_authority_object> wallet_api::list_custom_authorities(account_id_t
 }
 
 signed_transaction wallet_api::update_custom_authority(object_id_type auth,
-                                                       optional<int> operation_type,
+                                                       optional<unsigned_int> operation_type,
                                                        optional<bool> enabled,
                                                        optional<time_point_sec> valid_to,
                                                        optional<vector<restriction_v2>> restrictions)
 {
-   return my->update_custom_authority(auth, operation_type, enabled, valid_from, valid_to, restrictions);
+   return my->update_custom_authority(auth, operation_type, enabled, valid_to, restrictions);
 }
 
 signed_transaction wallet_api::delete_custom_authority(object_id_type auth)
