@@ -259,6 +259,7 @@ struct get_impacted_account_visitor
    void operator()( const custom_authority_create_operation& op )
    {
       _impacted.insert( op.fee_payer() ); // account
+      add_authority_accounts( _impacted, op.auth );
    }
    void operator()( const custom_authority_update_operation& op )
    {
