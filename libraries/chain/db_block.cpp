@@ -41,7 +41,7 @@
 #include <fc/smart_ref_impl.hpp>
 
 namespace graphene { namespace chain {
-   
+
 bool database::is_known_block( const block_id_type& id )const
 {
    return _fork_db.is_known_block(id) || _block_id_to_block.contains(id);
@@ -643,7 +643,7 @@ processed_transaction database::_apply_transaction(const signed_transaction& trx
       auto get_owner  = [&]( account_id_type id ) { return &id(*this).owner;  };
       trx.verify_authority( chain_id, get_active, get_owner, get_global_properties().parameters.max_authority_depth );
    }
-   
+
    //Skip all manner of expiration and TaPoS checking if we're on block 1; It's impossible that the transaction is
    //expired, and TaPoS makes no sense as no blocks exist.
    if( BOOST_LIKELY(head_block_num() > 0) )

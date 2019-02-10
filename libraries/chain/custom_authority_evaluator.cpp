@@ -40,7 +40,7 @@ void_result custom_authority_create_evaluator::do_evaluate(const custom_authorit
 object_id_type custom_authority_create_evaluator::do_apply(const custom_authority_create_operation& op)
 { try {
    database& d = db();
-   
+
    const auto& new_object = d.create<custom_authority_object>( [&op]( custom_authority_object& obj ){
       obj.account        = op.account;
       obj.auth           = op.auth;
