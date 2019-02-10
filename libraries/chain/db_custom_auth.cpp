@@ -67,16 +67,9 @@ namespace {
 vector< custom_authority_object > database::get_custom_authorities_by_account( account_id_type account ) const
 {
    const auto& authority_by_account = get_index_type<custom_authority_index>().indices().get<by_account>();
-   
-   vector<custom_authority_object> result;
-   
-   auto itr = authority_by_account.find(account);
-   while(itr != authority_by_account.end() && (*itr).account == account)
-   {
-      result.emplace_back(*itr++);
-   }
-   
-   return result;
+   auto authority_for_account_range = authority_by_account.equal_range(account);
+    
+   return vector<custom_authority_object>(authority_for_account_range.first, authority_for_account_range.second);
 }
    
 void database::verify_custom_authorities( const transaction& trx )const

@@ -45,10 +45,13 @@ namespace graphene { namespace chain {
 namespace {
 void disable_account_custom_authorities( database& db, const account_id_type& account )
 {
-   auto custom_authorities = db.get_custom_authorities_by_account(account);
-   for (auto& custom_authority: custom_authorities)
+   const auto& authority_by_account = db.get_index_type<custom_authority_index>().indices().get<by_account>();
+   auto authority_for_account_range = authority_by_account.equal_range(account);
+    
+   for (auto& custom_authority: boost::make_iterator_range(authority_for_account_range.first,
+                                                           authority_for_account_range.second))
    {
-      db.modify( db.get<custom_authority_object>(custom_authority.id), []( custom_authority_object& obj ){
+      db.modify( custom_authority, []( custom_authority_object& obj ){
          obj.enabled = false;
       });
    }
