@@ -844,6 +844,7 @@ class wallet_api
        * @returns the signed transaction creating custom authority
        */
       signed_transaction create_custom_authority(account_id_type account,
+                                                 authority auth,
                                                  int operation_type,
                                                  time_point_sec valid_from,
                                                  time_point_sec valid_to,
@@ -868,7 +869,8 @@ class wallet_api
        * @param restrictions restrictions list for operation arguments
        * @returns the signed transaction updating custom authority
        */
-      signed_transaction update_custom_authority(object_id_type auth,
+      signed_transaction update_custom_authority(object_id_type custom_auth,
+                                                 optional<authority> auth,
                                                  optional<unsigned_int> operation_type,
                                                  optional<bool> enabled,
                                                  optional<time_point_sec> valid_from,
