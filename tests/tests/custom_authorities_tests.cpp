@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cryptonomex, Inc., and contributors.
+ * Copyright (c) 2019 BitShares Core Team, and contributors.
  *
  * The MIT License
  *
