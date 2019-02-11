@@ -61,7 +61,9 @@ namespace graphene { namespace chain {
       custom_authority_object,
       indexed_by<
          ordered_unique< tag<by_id>, member< object, object_id_type, &object::id > >,
-         ordered_non_unique< tag<by_account>, member< custom_authority_object, account_id_type, &custom_authority_object::account > >
+         ordered_non_unique< tag<by_account>, member< custom_authority_object,
+                                                      account_id_type,
+                                                      &custom_authority_object::account > >
       >
    > custom_authority_multi_index_type;
 
