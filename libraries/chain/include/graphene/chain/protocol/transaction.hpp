@@ -149,6 +149,13 @@ namespace graphene { namespace chain {
          const std::function<const authority*(account_id_type)>& get_active,
          const std::function<const authority*(account_id_type)>& get_owner,
          uint32_t max_recursion = GRAPHENE_MAX_SIG_CHECK_DEPTH )const;
+      
+      void verify_authority_ex(
+         const chain_id_type& chain_id,
+         const std::function<const authority*(account_id_type)>& get_active,
+         const std::function<const authority*(account_id_type)>& get_owner,
+         const std::function<const std::vector<custom_authority_object>(account_id_type)>& get_custom_authorities,
+         uint32_t max_recursion = GRAPHENE_MAX_SIG_CHECK_DEPTH )const;
 
       /**
        * This is a slower replacement for get_required_signatures()
@@ -194,6 +201,7 @@ namespace graphene { namespace chain {
    void verify_authority( const vector<operation>& ops, const flat_set<public_key_type>& sigs,
                           const std::function<const authority*(account_id_type)>& get_active,
                           const std::function<const authority*(account_id_type)>& get_owner,
+                          const std::function<const std::vector<custom_authority_object>(account_id_type)>& get_custom_authorities,
                           uint32_t max_recursion = GRAPHENE_MAX_SIG_CHECK_DEPTH,
                           bool allow_committe = false,
                           const flat_set<account_id_type>& active_aprovals = flat_set<account_id_type>(),

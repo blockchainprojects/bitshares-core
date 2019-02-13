@@ -632,16 +632,18 @@ processed_transaction database::_apply_transaction(const signed_transaction& trx
    const chain_parameters& chain_parameters = get_global_properties().parameters;
    eval_state._trx = &trx;
    
-   if( head_block_time() > HARDFORK_CORE_1285_TIME )
-   {
-      verify_custom_authorities(trx);
-   }
-   
    if( !(skip & (skip_transaction_signatures | skip_authority_check) ) )
    {
       auto get_active = [&]( account_id_type id ) { return &id(*this).active; };
       auto get_owner  = [&]( account_id_type id ) { return &id(*this).owner;  };
-      trx.verify_authority( chain_id, get_active, get_owner, get_global_properties().parameters.max_authority_depth );
+      auto get_custom_authorities  =  [&]( account_id_type id ) -> std::vector<custom_authority_object>
+      { return get_custom_authorities_by_account(id); };
+      
+      trx.verify_authority_ex( chain_id,
+                               get_active,
+                               get_owner,
+                               get_custom_authorities,
+                               get_global_properties().parameters.max_authority_depth );
    }
 
    //Skip all manner of expiration and TaPoS checking if we're on block 1; It's impossible that the transaction is

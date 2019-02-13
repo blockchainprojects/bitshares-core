@@ -50,6 +50,7 @@ namespace graphene { namespace chain {
          vector<restriction_v2>          restrictions;
        
          bool validate(const operation& an_operation, const time_point_sec now) const;
+         bool validate(const operation& an_operation) const; 
    };
 
    struct by_account;
