@@ -77,7 +77,7 @@ struct custom_authorities_operations_fixture: database_fixture
       trx.clear();
    }
    
-   void push_transfer_operation_from_nathan_to_core()
+   void push_transfer_operation_from_nathan_to_core(bool sign_is_required = true)
    {
       transfer_operation op;
       op.from = nathan->id;
@@ -86,7 +86,10 @@ struct custom_authorities_operations_fixture: database_fixture
       
       trx.operations = {op};
       
-      sign(trx, nathan_key);
+      if (sign_is_required)
+      {
+         sign(trx, nathan_key);
+      }
       
       PUSH_TX( db, trx, database::skip_transaction_dupe_check );
       
@@ -352,7 +355,7 @@ BOOST_AUTO_TEST_CASE(transaction_passes_with_authorities_installed) {
       auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE_EQUAL(1, authorities.size());
       
-      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core());
+      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core(false));
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
@@ -367,7 +370,7 @@ BOOST_AUTO_TEST_CASE(transaction_passes_with_one_authority_passed_and_one_failed
       auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE(!authorities.empty());
       
-      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core());
+      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core(false));
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
@@ -382,7 +385,7 @@ BOOST_AUTO_TEST_CASE(transaction_fails_with_one_authority_failed_and_one_disable
       auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE(!authorities.empty());
       
-      BOOST_CHECK_THROW(push_transfer_operation_from_nathan_to_core(), fc::exception);
+      BOOST_CHECK_THROW(push_transfer_operation_from_nathan_to_core(false), fc::exception);
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
@@ -401,7 +404,7 @@ BOOST_AUTO_TEST_CASE(transaction_fails_with_one_failed_restriction) {
       auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE(!authorities.empty());
       
-      BOOST_CHECK_THROW(push_transfer_operation_from_nathan_to_core(), fc::exception);
+      BOOST_CHECK_THROW(push_transfer_operation_from_nathan_to_core(false), fc::exception);
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
@@ -420,7 +423,7 @@ BOOST_AUTO_TEST_CASE(transaction_succeeds_with_one_restriction) {
       auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE(!authorities.empty());
       
-      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core());
+      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core(false));
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
