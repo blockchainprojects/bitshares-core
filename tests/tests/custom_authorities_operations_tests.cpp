@@ -461,8 +461,9 @@ BOOST_AUTO_TEST_CASE(limit_order_fails_with_custom_authority)
    op.expiration = db.head_block_time() + fc::seconds(10);
    
    trx.operations = {op};
+   sign(trx, nathan_key);
    
-   BOOST_CHECK_THROW(PUSH_TX( db, trx, ~0 ), fc::exception);
+   BOOST_CHECK_THROW(db.push_transaction(trx), fc::exception);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

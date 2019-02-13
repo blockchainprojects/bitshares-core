@@ -42,6 +42,36 @@
 
 namespace graphene { namespace chain {
 
+namespace {
+   vector< custom_authority_object > filter_enabled_custom_authorities( const vector< custom_authority_object >& custom_authorities )
+   {
+      vector< custom_authority_object > result;
+      for (auto& auth: custom_authorities)
+      {
+         if (auth.enabled)
+         {
+            result.emplace_back(auth);
+         }
+      }
+      
+      return result;
+   }
+   
+   vector< custom_authority_object > filter_valid_custom_authorities( const vector< custom_authority_object >& custom_authorities, fc::time_point_sec now)
+   {
+      vector< custom_authority_object > result;
+      for (auto& auth: custom_authorities)
+      {
+         if ( auth.valid_from < now && now < auth.valid_to )
+         {
+            result.emplace_back(auth);
+         }
+      }
+      
+      return result;
+   }
+}
+   
 bool database::is_known_block( const block_id_type& id )const
 {
    return _fork_db.is_known_block(id) || _block_id_to_block.contains(id);
@@ -637,7 +667,13 @@ processed_transaction database::_apply_transaction(const signed_transaction& trx
       auto get_active = [&]( account_id_type id ) { return &id(*this).active; };
       auto get_owner  = [&]( account_id_type id ) { return &id(*this).owner;  };
       auto get_custom_authorities  =  [&]( account_id_type id ) -> std::vector<custom_authority_object>
-      { return get_custom_authorities_by_account(id); };
+      {
+         auto custom_auths = get_custom_authorities_by_account(id);
+         auto enabled_authorities = filter_enabled_custom_authorities(custom_auths);
+         auto valid_authorities = filter_valid_custom_authorities(enabled_authorities, head_block_time());
+         
+         return valid_authorities;
+      };
       
       trx.verify_authority_ex( chain_id,
                                get_active,

@@ -30,19 +30,19 @@
 namespace graphene { namespace chain {
 
 namespace {
-   vector< custom_authority_object > filter_enabled_custom_authorities( const vector< custom_authority_object >& custom_authorities )
-   {
-      vector< custom_authority_object > result;
-      for (auto& auth: custom_authorities)
-      {
-         if (auth.enabled)
-         {
-            result.emplace_back(auth);
-         }
-      }
-      
-      return result;
-   }
+//   vector< custom_authority_object > filter_enabled_custom_authorities( const vector< custom_authority_object >& custom_authorities )
+//   {
+//      vector< custom_authority_object > result;
+//      for (auto& auth: custom_authorities)
+//      {
+//         if (auth.enabled)
+//         {
+//            result.emplace_back(auth);
+//         }
+//      }
+//      
+//      return result;
+//   }
    
    flat_set< account_id_type > get_required_accounts( const operation& op )
    {
@@ -72,25 +72,25 @@ vector< custom_authority_object > database::get_custom_authorities_by_account( a
    return vector<custom_authority_object>(authority_for_account_range.first, authority_for_account_range.second);
 }
    
-void database::verify_custom_authorities( const transaction& trx )const
-{
-   for (auto& op: trx.operations)
-   {
-      auto required_accounts = get_required_accounts(op);
-      for (auto& account_id: required_accounts)
-      {
-         auto custom_authorities = get_custom_authorities_by_account(account_id);
-         custom_authorities = filter_enabled_custom_authorities(custom_authorities);
-         
-         bool operation_verified = custom_authorities.empty();
-         for (auto& custom_auth: custom_authorities)
-         {
-            operation_verified |= custom_auth.validate(op, head_block_time());
-         }
-         
-         FC_ASSERT(operation_verified, "Operation was not verified by any custom authority.");
-      }
-   }
-}
+//void database::verify_custom_authorities( const transaction& trx )const
+//{
+//   for (auto& op: trx.operations)
+//   {
+//      auto required_accounts = get_required_accounts(op);
+//      for (auto& account_id: required_accounts)
+//      {
+//         auto custom_authorities = get_custom_authorities_by_account(account_id);
+//         custom_authorities = filter_enabled_custom_authorities(custom_authorities);
+//
+//         bool operation_verified = custom_authorities.empty();
+//         for (auto& custom_auth: custom_authorities)
+//         {
+//            operation_verified |= custom_auth.validate(op, head_block_time());
+//         }
+//
+//         FC_ASSERT(operation_verified, "Operation was not verified by any custom authority.");
+//      }
+//   }
+//}
 
 } }
