@@ -111,3 +111,25 @@ bool custom_authority_object::validate( const operation& op, const time_point_se
       return false; // validation failed
    }
 }
+
+bool custom_authority_object::validate( const operation& op ) const
+{
+   try
+   {
+      if (operation_type.value != get_type_id(op))
+      {
+         FC_THROW("Failed to validate the operation because is has the wrong type.");
+      }
+      
+      for (auto& rest: restrictions)
+      {
+         validate_operation_by_restriction(op, rest);
+      }
+      
+      return true;
+   }
+   catch (fc::exception&)
+   {
+      return false; // validation failed
+   }
+}
