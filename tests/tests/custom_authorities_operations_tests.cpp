@@ -26,6 +26,7 @@
 #include <graphene/chain/protocol/custom_authority.hpp>
 #include <graphene/chain/custom_authority_object.hpp>
 #include <graphene/chain/operation_type_to_id.hpp>
+#include <fc/crypto/digest.hpp>
 
 #include "../common/database_fixture.hpp"
 
@@ -35,7 +36,16 @@ using namespace graphene::app;
 
 struct custom_authorities_operations_fixture: database_fixture
 {
-   void create_custom_authority(const account_id_type& account, bool enabled, int operation_type)
+   custom_authorities_operations_fixture()
+   {
+      nathan_key = fc::ecc::private_key::generate();
+      nathan = &create_account("nathan", nathan_key.get_public_key());
+      core = &asset_id_type()(db);
+      
+      fund(*nathan);
+   }
+   
+   void create_custom_authority(const account_id_type& account, bool enabled, int operation_type, const std::vector<restriction_v2>& restrictions = {})
    {
       custom_authority_create_operation op; 
       op.account = account;
@@ -43,6 +53,7 @@ struct custom_authorities_operations_fixture: database_fixture
       op.valid_from = db.head_block_time() - 1;
       op.valid_to = db.head_block_time() + 20;
       op.operation_type = operation_type;
+      op.restrictions = restrictions;
       
       trx.operations.push_back(op);
       trx.validate();
@@ -65,6 +76,26 @@ struct custom_authorities_operations_fixture: database_fixture
       db.push_transaction(trx, ~0);
       trx.clear();
    }
+   
+   void push_transfer_operation_from_nathan_to_core()
+   {
+      transfer_operation op;
+      op.from = nathan->id;
+      op.to = account_id_type();
+      op.amount = core->amount(500);
+      
+      trx.operations = {op};
+      
+      sign(trx, nathan_key);
+      
+      PUSH_TX( db, trx, database::skip_transaction_dupe_check );
+      
+      trx.operations.clear();
+   }
+   
+   fc::ecc::private_key nathan_key;
+   const account_object* nathan = nullptr;
+   const asset_object* core = nullptr;
 };
 
 BOOST_FIXTURE_TEST_SUITE( custom_authorities_operations, custom_authorities_operations_fixture )
@@ -280,19 +311,8 @@ BOOST_AUTO_TEST_CASE(custom_authority_is_disabled_after_account_update_with_serv
 
 BOOST_AUTO_TEST_CASE(transaction_passes_without_authorities_installed) {
    try {
-      auto dan = create_account("dan");
       
-      custom_authority_create_operation op;
-      op.account = dan.id;
-      op.enabled = true;
-      op.valid_from = time_point_sec(1);
-      op.valid_to = time_point_sec(2);
-      op.operation_type = int_from_operation_type<transfer_operation>::value;
-      
-      trx.operations.push_back(op);
-      trx.validate();
-      
-      BOOST_CHECK_NO_THROW(db.push_transaction(trx, ~0));
+      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core());
 
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
@@ -302,14 +322,12 @@ BOOST_AUTO_TEST_CASE(transaction_passes_without_authorities_installed) {
 
 BOOST_AUTO_TEST_CASE(transaction_fails_with_authorities_installed) {
    try {
-      auto dan = create_account("dan");
-      
       custom_authority_create_operation op;
-      op.account = dan.id;
+      op.account = nathan->id;
       op.enabled = true;
       op.valid_from = time_point_sec(1); //validation will fail because of not valid interval
       op.valid_to = time_point_sec(2);
-      op.operation_type = int_from_operation_type<custom_authority_delete_operation>::value;
+      op.operation_type = int_from_operation_type<transfer_operation>::value;
       
       trx.operations.push_back(op);
       trx.validate();
@@ -317,22 +335,10 @@ BOOST_AUTO_TEST_CASE(transaction_fails_with_authorities_installed) {
       db.push_transaction(trx, ~0);
       trx.operations.clear();
       
-      auto authorities = db.get_custom_authorities_by_account(dan.id);
+      auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE_EQUAL(1, authorities.size());
       
-      {
-         custom_authority_delete_operation op;
-         op.account = dan.id;
-         op.custom_authority_to_delete = authorities.front().id;
-         
-         trx.operations.push_back(op);
-         trx.validate();
-         
-         BOOST_CHECK_THROW(db.push_transaction(trx, ~0), fc::exception);
-         
-         trx.operations.clear();
-      }
-      
+      BOOST_CHECK_THROW(push_transfer_operation_from_nathan_to_core(), fc::exception);
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
@@ -341,26 +347,12 @@ BOOST_AUTO_TEST_CASE(transaction_fails_with_authorities_installed) {
 
 BOOST_AUTO_TEST_CASE(transaction_passes_with_authorities_installed) {
    try {
-      auto dan = create_account("dan");
+      create_custom_authority(nathan->id, true, int_from_operation_type<transfer_operation>::value);
       
-      create_custom_authority(dan.id, true, int_from_operation_type<custom_authority_delete_operation>::value);
-      
-      auto authorities = db.get_custom_authorities_by_account(dan.id);
+      auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE_EQUAL(1, authorities.size());
       
-      {
-         custom_authority_delete_operation op;
-         op.account = dan.id;
-         op.custom_authority_to_delete = authorities.front().id;
-         
-         trx.operations.push_back(op);
-         trx.validate();
-         
-         BOOST_CHECK_NO_THROW(db.push_transaction(trx, ~0));
-         
-         trx.operations.clear();
-      }
-      
+      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core());
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
@@ -369,27 +361,13 @@ BOOST_AUTO_TEST_CASE(transaction_passes_with_authorities_installed) {
 
 BOOST_AUTO_TEST_CASE(transaction_passes_with_one_authority_passed_and_one_failed) {
    try {
-      auto dan = create_account("dan");
+      create_custom_authority(nathan->id, true, int_from_operation_type<custom_authority_create_operation>::value);
+      create_custom_authority(nathan->id, true, int_from_operation_type<transfer_operation>::value);
       
-      create_custom_authority(dan.id, true, int_from_operation_type<custom_authority_create_operation>::value);
-      create_custom_authority(dan.id, true, int_from_operation_type<custom_authority_delete_operation>::value);
-      
-      auto authorities = db.get_custom_authorities_by_account(dan.id);
+      auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE(!authorities.empty());
       
-      {
-         custom_authority_delete_operation op;
-         op.account = dan.id;
-         op.custom_authority_to_delete = authorities.front().id;
-         
-         trx.operations.push_back(op);
-         trx.validate();
-         
-         BOOST_CHECK_NO_THROW(db.push_transaction(trx, ~0));
-         
-         trx.operations.clear();
-      }
-      
+      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core());
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
@@ -398,31 +376,93 @@ BOOST_AUTO_TEST_CASE(transaction_passes_with_one_authority_passed_and_one_failed
 
 BOOST_AUTO_TEST_CASE(transaction_fails_with_one_authority_failed_and_one_disabled) {
    try {
-      auto dan = create_account("dan");
-   
-      create_custom_authority(dan.id, true, int_from_operation_type<custom_authority_create_operation>::value);
-      create_custom_authority(dan.id, false, int_from_operation_type<custom_authority_delete_operation>::value);
+      create_custom_authority(nathan->id, true, int_from_operation_type<custom_authority_create_operation>::value);
+      create_custom_authority(nathan->id, false, int_from_operation_type<transfer_operation>::value);
       
-      auto authorities = db.get_custom_authorities_by_account(dan.id);
+      auto authorities = db.get_custom_authorities_by_account(nathan->id);
       BOOST_REQUIRE(!authorities.empty());
       
-      {
-         custom_authority_delete_operation op;
-         op.account = dan.id;
-         op.custom_authority_to_delete = authorities.front().id;
-         
-         trx.operations.push_back(op);
-         trx.validate();
-         
-         BOOST_CHECK_THROW(db.push_transaction(trx, ~0), fc::exception);
-         
-         trx.operations.clear();
-      }
-      
+      BOOST_CHECK_THROW(push_transfer_operation_from_nathan_to_core(), fc::exception);
    } catch (fc::exception &e) {
       edump((e.to_detail_string()));
       throw;
    }
+}
+
+BOOST_AUTO_TEST_CASE(transaction_fails_with_one_failed_restriction) {
+   try {
+      
+      eq_restriction restriction;
+      restriction.value = asset(400);
+      restriction.argument = "amount";
+      
+      create_custom_authority(nathan->id, true, int_from_operation_type<transfer_operation>::value, {restriction});
+      
+      auto authorities = db.get_custom_authorities_by_account(nathan->id);
+      BOOST_REQUIRE(!authorities.empty());
+      
+      BOOST_CHECK_THROW(push_transfer_operation_from_nathan_to_core(), fc::exception);
+   } catch (fc::exception &e) {
+      edump((e.to_detail_string()));
+      throw;
+   }
+}
+
+BOOST_AUTO_TEST_CASE(transaction_succeeds_with_one_restriction) {
+   try {
+      
+      eq_restriction restriction;
+      restriction.value = asset(500);
+      restriction.argument = "amount";
+      
+      create_custom_authority(nathan->id, true, int_from_operation_type<transfer_operation>::value, {restriction});
+      
+      auto authorities = db.get_custom_authorities_by_account(nathan->id);
+      BOOST_REQUIRE(!authorities.empty());
+      
+      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core());
+   } catch (fc::exception &e) {
+      edump((e.to_detail_string()));
+      throw;
+   }
+}
+
+BOOST_AUTO_TEST_CASE(limit_order_succeeds_with_custom_authority)
+{
+   create_custom_authority(nathan->id, true, int_from_operation_type<limit_order_create_operation>::value);
+   
+   auto* test = &create_bitasset("test");
+   
+   limit_order_create_operation op;
+   op.seller = nathan->id;
+   op.amount_to_sell = core->amount(500);
+   op.min_to_receive = test->amount(500);
+   op.expiration = db.head_block_time() + fc::seconds(10);
+   
+   trx.operations = {op};
+   
+   BOOST_CHECK_NO_THROW(PUSH_TX( db, trx, ~0 ));
+}
+
+BOOST_AUTO_TEST_CASE(limit_order_fails_with_custom_authority)
+{
+   neq_restriction restriction;
+   restriction.value = asset(500);
+   restriction.argument = "amount_to_sell";
+   
+   create_custom_authority(nathan->id, true, int_from_operation_type<limit_order_create_operation>::value, {restriction});
+   
+   auto* test = &create_bitasset("test");
+   
+   limit_order_create_operation op;
+   op.seller = nathan->id;
+   op.amount_to_sell = core->amount(500);
+   op.min_to_receive = test->amount(500);
+   op.expiration = db.head_block_time() + fc::seconds(10);
+   
+   trx.operations = {op};
+   
+   BOOST_CHECK_THROW(PUSH_TX( db, trx, ~0 ), fc::exception);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
