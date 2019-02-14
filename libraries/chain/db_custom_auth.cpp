@@ -29,41 +29,6 @@
 
 namespace graphene { namespace chain {
 
-namespace {
-//   vector< custom_authority_object > filter_enabled_custom_authorities( const vector< custom_authority_object >& custom_authorities )
-//   {
-//      vector< custom_authority_object > result;
-//      for (auto& auth: custom_authorities)
-//      {
-//         if (auth.enabled)
-//         {
-//            result.emplace_back(auth);
-//         }
-//      }
-//      
-//      return result;
-//   }
-   
-   flat_set< account_id_type > get_required_accounts( const operation& op )
-   {
-      flat_set<account_id_type> required_accounts;
-      
-      flat_set<account_id_type> active_accounts;
-      flat_set<account_id_type> owner_accounts;
-      
-      //it is need only as argument for operation_get_required_authorities() function
-      //we won't use it anyhow
-      vector<authority> other_authorities;
-      
-      operation_get_required_authorities(op, active_accounts, owner_accounts, other_authorities);
-      
-      required_accounts.insert(active_accounts.begin(), active_accounts.end());
-      required_accounts.insert(owner_accounts.begin(), owner_accounts.end());
-      
-      return required_accounts;
-   }
-}
-
 vector< custom_authority_object > database::get_custom_authorities_by_account( account_id_type account ) const
 {
    const auto& authority_by_account = get_index_type<custom_authority_index>().indices().get<by_account>();
@@ -71,26 +36,5 @@ vector< custom_authority_object > database::get_custom_authorities_by_account( a
     
    return vector<custom_authority_object>(authority_for_account_range.first, authority_for_account_range.second);
 }
-   
-//void database::verify_custom_authorities( const transaction& trx )const
-//{
-//   for (auto& op: trx.operations)
-//   {
-//      auto required_accounts = get_required_accounts(op);
-//      for (auto& account_id: required_accounts)
-//      {
-//         auto custom_authorities = get_custom_authorities_by_account(account_id);
-//         custom_authorities = filter_enabled_custom_authorities(custom_authorities);
-//
-//         bool operation_verified = custom_authorities.empty();
-//         for (auto& custom_auth: custom_authorities)
-//         {
-//            operation_verified |= custom_auth.validate(op, head_block_time());
-//         }
-//
-//         FC_ASSERT(operation_verified, "Operation was not verified by any custom authority.");
-//      }
-//   }
-//}
 
 } }
