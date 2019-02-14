@@ -365,27 +365,41 @@ typedef base_list_restriction<contains_none>        contains_none_restriction;
 
 struct restriction_holder;
 
-struct attribute_assert
+struct attribute_assert_restriction
 {
    string argument;
    vector<restriction_holder> restrictions;
    
    template <typename Operation>
-   void validate( const Operation& op ) const
-   {
-     
-   }
+   void validate( const Operation& op ) const;
    
    template <typename Operation>
-   void validate() const
-   {
-     
-   }
+   void validate() const;
    
    uint64_t get_units() const
    {
       return 1;
    }
+};
+   
+class sub_restriction_validator
+{
+public:
+   sub_restriction_validator(const vector<restriction_holder>& restrictions)
+   : m_restrictions(restrictions)
+   {}
+   
+   template <class T>
+   void operator () (const T& obj) const;
+   
+   template <class T>
+   void operator () (const T& obj, fc::true_type reflector_is_defined) const;
+   
+   template <class T>
+   void operator () (const T&, fc::false_type reflector_is_defined) const;
+   
+private:
+   const vector<restriction_holder>& m_restrictions;
 };
     
 typedef fc::static_variant<eq_restriction,
@@ -394,7 +408,7 @@ typedef fc::static_variant<eq_restriction,
                            none_restriction,
                            contains_all_restriction,
                            contains_none_restriction,
-                           attribute_assert> restriction_v2;
+                           attribute_assert_restriction> restriction_v2;
    
 struct restriction_holder
 {
@@ -406,6 +420,42 @@ struct restriction_holder
    
    restriction_v2 rest;
 };
+   
+template <class T>
+void sub_restriction_validator::operator () (const T& obj) const
+{
+   //this is need to separate simple types as int, string from bitahsers types like operations and other objects
+   //for starndard types this should not be applied
+   typename fc::reflector<T>::is_defined reflector_is_defined;
+   operator() (obj, reflector_is_defined);
+}
+
+template <class T>
+void sub_restriction_validator::operator () (const T& obj, fc::true_type reflector_is_defined) const
+{
+   specific_operation_validation_visitor<T> visitor;
+   visitor.op = obj;
+   
+   for (auto& rest: m_restrictions)
+   {
+      rest.rest.visit(visitor);
+   }
+}
+
+template <class T>
+void sub_restriction_validator::operator () (const T&, fc::false_type reflector_is_defined) const
+{}
+   
+template <typename Operation>
+void attribute_assert_restriction::validate( const Operation& op ) const
+{
+}
+
+template <typename Operation>
+void attribute_assert_restriction::validate() const
+{
+   
+}
 
 } }
 
@@ -463,7 +513,7 @@ FC_REFLECT( graphene::chain::restriction_holder,
            (rest)
            )
 
-FC_REFLECT( graphene::chain::attribute_assert,
+FC_REFLECT( graphene::chain::attribute_assert_restriction,
            (argument)
            (restrictions)
            )

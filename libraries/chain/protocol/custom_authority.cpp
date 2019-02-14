@@ -66,7 +66,6 @@ namespace {
          return rest.get_units();
       }
    };
-   
 }
    
 share_type custom_authority_create_operation::calculate_fee( const fee_parameters_type& k )const

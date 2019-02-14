@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE(limit_order_succeeds_with_custom_authority)
 {
    create_custom_authority(nathan->id, true, int_from_operation_type<limit_order_create_operation>::value);
    
-   auto* test = &create_bitasset("test");
+   auto* test = &create_bitasset("MIATEST");
    
    limit_order_create_operation op;
    op.seller = nathan->id;
@@ -452,7 +452,7 @@ BOOST_AUTO_TEST_CASE(limit_order_fails_with_custom_authority)
    
    create_custom_authority(nathan->id, true, int_from_operation_type<limit_order_create_operation>::value, {restriction});
    
-   auto* test = &create_bitasset("test");
+   auto* test = &create_bitasset("MIATEST");
    
    limit_order_create_operation op;
    op.seller = nathan->id;

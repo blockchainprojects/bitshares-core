@@ -608,6 +608,57 @@ BOOST_AUTO_TEST_CASE( optional_field_validation_fails_when_optional_holds_incorr
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
+struct attribute_assert_restriction_v2
+{
+   string argument;
+   vector<restriction_holder> restrictions;
+   
+   template <typename Operation>
+   void validate( const Operation& op ) const
+   {
+      member_visitor<Operation, sub_restriction_validator> visitor(argument, sub_restriction_validator(restrictions), op);
+      fc::reflector<Operation>::visit(visitor);
+   }
+   
+   template <typename Operation>
+   void validate() const
+   {
+      
+   }
+   
+   uint64_t get_units() const
+   {
+      return 1;
+   }
+};
+
+BOOST_AUTO_TEST_CASE( attribute_assert_passes_without_sub_restrictions)
+{
+   asset_create_operation operation;
+   
+   attribute_assert_restriction_v2 restriction;
+   restriction.argument = "asset_options";
+   restriction.restrictions = {};
+   
+   BOOST_CHECK_NO_THROW(restriction.validate(operation));
+}
+
+BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_eq_sub_restrictions)
+{
+   asset_create_operation operation;
+   operation.common_options.market_fee_percent = 101;
+   
+   eq_restriction sub_restriction;
+   sub_restriction.argument = "market_fee_percent";
+   sub_restriction.value = uint16_t(100);
+   
+   attribute_assert_restriction_v2 restriction;
+   restriction.argument = "common_options";
+   restriction.restrictions = {restriction_holder(sub_restriction)};
+   
+   BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE( custom_authority_utils )
