@@ -324,4 +324,17 @@ private:
    }
 };
    
+template <typename Operation>
+struct specific_operation_validation_visitor
+{
+   Operation op;
+   typedef void result_type;
+   
+   template <class Restriction>
+   void operator () ( const Restriction& rest )
+   {
+      rest.validate(op);
+   }
+};
+   
 } } 
