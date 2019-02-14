@@ -261,6 +261,12 @@ void verify_authority( const vector<operation>& ops, const flat_set<public_key_t
    flat_set<account_id_type> required_active;
    flat_set<account_id_type> required_owner;
    vector<authority> other;
+   
+   if( !allow_committe )
+      GRAPHENE_ASSERT( required_active.find(GRAPHENE_COMMITTEE_ACCOUNT) == required_active.end(),
+                      invalid_committee_approval, "Committee account may only propose transactions" );
+   
+   sign_state s(sigs,get_active);
 
    for( const auto& op : ops )
    {
@@ -273,31 +279,24 @@ void verify_authority( const vector<operation>& ops, const flat_set<public_key_t
          if ( custom_authes.empty() )
          {
             required_active.insert(id);
+            break;
          }
-         else
+         
+         bool operation_verified = false;
+         for ( auto custom_auth: custom_authes )
          {
-            bool operation_verified = false;
-            for (auto custom_auth: custom_authes)
-            {
-               operation_verified |= custom_auth.validate(op);
-            }
-            
-            FC_ASSERT(operation_verified, "Failed to verify operation");
-            required_active.insert(id);
+            operation_verified |= (custom_auth.validate(op) && s.check_authority(&custom_auth.auth));
          }
+         
+         FC_ASSERT(operation_verified, "Failed to verify operation");
       }
       
       //validate auth in custom authes
    }
-
-   if( !allow_committe )
-      GRAPHENE_ASSERT( required_active.find(GRAPHENE_COMMITTEE_ACCOUNT) == required_active.end(),
-                       invalid_committee_approval, "Committee account may only propose transactions" );
-
-   sign_state s(sigs,get_active);
    s.max_recursion = max_recursion_depth;
    for( auto& id : active_aprovals )
       s.approved_by.insert( id );
+   
    for( auto& id : owner_approvals )
       s.approved_by.insert( id );
 
