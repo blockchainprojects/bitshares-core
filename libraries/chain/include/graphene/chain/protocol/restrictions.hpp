@@ -379,12 +379,52 @@ struct attribute_assert_restriction
    template <typename Operation>
    void validate() const;
    
-   uint64_t get_units() const
-   {
-      return 1;
-   }
+   uint64_t get_units() const;
 };
    
+class sub_restriction_checker
+{
+public:
+   sub_restriction_checker(const vector<restriction_holder>& restrictions)
+   : m_restrictions(restrictions)
+   {}
+   
+   template <class T>
+   void operator () (const T& obj) const;
+   
+   template <class T>
+   void operator () (const T& obj, fc::true_type reflector_is_defined) const;
+   
+   template <class T>
+   void operator () (const T&, fc::false_type reflector_is_defined) const;
+   
+private:
+   const vector<restriction_holder>& m_restrictions;
+};
+   
+struct units_fetcher
+{
+   typedef uint64_t result_type;
+   
+   template <typename T>
+   result_type operator () (const T& rest) const
+   {
+      return rest.get_units();
+   }
+};
+
+template <typename Operation>
+struct restriction_validator_visitor
+{
+   typedef void result_type;
+   
+   template <typename Restriction>
+   void operator () (const Restriction& rest) const
+   {
+      rest.template validate<Operation>();
+   }
+};
+
 class sub_restriction_validator
 {
 public:
@@ -404,7 +444,7 @@ public:
 private:
    const vector<restriction_holder>& m_restrictions;
 };
-    
+   
 typedef fc::static_variant<eq_restriction,
                            neq_restriction,
                            any_restriction,
@@ -423,6 +463,30 @@ struct restriction_holder
    
    restriction_v2 rest;
 };
+
+template <typename Operation>
+void validate_operation_type(const restriction_v2& rest);
+
+template <class T>
+void sub_restriction_checker::operator () (const T& obj) const
+{
+   //this is need to separate simple types as int, string from bitahsers types like operations and other objects
+   //for starndard types this should not be applied
+   typename fc::reflector<T>::is_defined reflector_is_defined;
+   operator() (obj, reflector_is_defined);
+}
+
+template <class T>
+void sub_restriction_checker::operator () (const T& obj, fc::true_type reflector_is_defined) const
+{
+   specific_operation_validation_visitor<T> visitor;
+   visitor.op = obj;
+   
+   for (auto& rest: m_restrictions)
+   {
+      rest.rest.visit(visitor);
+   }
+}
    
 template <class T>
 void sub_restriction_validator::operator () (const T& obj) const
@@ -436,28 +500,44 @@ void sub_restriction_validator::operator () (const T& obj) const
 template <class T>
 void sub_restriction_validator::operator () (const T& obj, fc::true_type reflector_is_defined) const
 {
-   specific_operation_validation_visitor<T> visitor;
-   visitor.op = obj;
-   
    for (auto& rest: m_restrictions)
    {
-      rest.rest.visit(visitor);
+      validate_operation_type<T>(rest.rest);
    }
 }
 
 template <class T>
 void sub_restriction_validator::operator () (const T&, fc::false_type reflector_is_defined) const
+{
+   FC_THROW("Attribute assert can get sub fileds of the object.");
+}
+
+template <class T>
+void sub_restriction_checker::operator () (const T&, fc::false_type reflector_is_defined) const
 {}
    
 template <typename Operation>
 void attribute_assert_restriction::validate( const Operation& op ) const
 {
+   member_visitor<Operation, sub_restriction_checker> visitor(argument, sub_restriction_checker(restrictions), op);
+   fc::reflector<Operation>::visit(visitor);
 }
 
 template <typename Operation>
 void attribute_assert_restriction::validate() const
 {
-   
+   member_visitor<Operation,
+   sub_restriction_validator> visitor(argument,
+                                      sub_restriction_validator(restrictions),
+                                      Operation());
+   fc::reflector<Operation>::visit(visitor);
+}
+
+template <typename Operation>
+void validate_operation_type(const restriction_v2& rest)
+{
+   restriction_validator_visitor<Operation> visitor;
+   rest.visit(visitor);
 }
 
 } }

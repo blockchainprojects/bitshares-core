@@ -608,108 +608,11 @@ BOOST_AUTO_TEST_CASE( optional_field_validation_fails_when_optional_holds_incorr
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-struct units_fetcher
-{
-   typedef uint64_t result_type;
-   
-   template <typename T>
-   result_type operator () (const T& rest) const
-   {
-      return rest.get_units();
-   }
-};
-
-template <typename Operation>
-struct restriction_validator_visitor
-{
-   typedef void result_type;
-   
-   template <typename Restriction>
-   void operator () (const Restriction& rest) const
-   {
-      rest.template validate<Operation>();
-   }
-};
-
-template <typename Operation>
-void validate_operation_type(const restriction_v2& rest)
-{
-   restriction_validator_visitor<Operation> visitor;
-   rest.visit(visitor);
-}
-
-class sub_restriction_validator_v2
-{
-public:
-   sub_restriction_validator_v2(const vector<restriction_holder>& restrictions)
-   : m_restrictions(restrictions)
-   {}
-   
-   template <class T>
-   void operator () (const T& obj) const
-   {
-      //this is need to separate simple types as int, string from bitahsers types like operations and other objects
-      //for starndard types this should not be applied
-      typename fc::reflector<T>::is_defined reflector_is_defined;
-      operator() (obj, reflector_is_defined);
-   }
-   
-   template <class T>
-   void operator () (const T& obj, fc::true_type reflector_is_defined) const
-   {
-      for (auto& rest: m_restrictions)
-      {
-         validate_operation_type<T>(rest.rest);
-      }
-   }
-   
-   template <class T>
-   void operator () (const T&, fc::false_type reflector_is_defined) const
-   {}
-   
-private:
-   const vector<restriction_holder>& m_restrictions;
-};
-struct attribute_assert_restriction_v2
-{
-   string argument;
-   vector<restriction_holder> restrictions;
-   
-   template <typename Operation>
-   void validate( const Operation& op ) const
-   {
-      member_visitor<Operation, sub_restriction_validator> visitor(argument, sub_restriction_validator(restrictions), op);
-      fc::reflector<Operation>::visit(visitor);
-   }
-   
-   template <typename Operation>
-   void validate() const
-   {
-      member_visitor<Operation,
-                     sub_restriction_validator_v2> visitor(argument,
-                                                           sub_restriction_validator_v2(restrictions),
-                                                           Operation());
-      fc::reflector<Operation>::visit(visitor);
-   }
-   
-   uint64_t get_units() const
-   {
-      uint64_t result = 0;
-      for ( auto& rest: restrictions )
-      {
-         units_fetcher visitor;
-         result += rest.rest.visit(visitor);
-      }
-      
-      return result;
-   }
-};
-
 BOOST_AUTO_TEST_CASE( attribute_assert_passes_without_sub_restrictions)
 {
    asset_create_operation operation;
    
-   attribute_assert_restriction_v2 restriction;
+   attribute_assert_restriction restriction;
    restriction.argument = "asset_options";
    restriction.restrictions = {};
    
@@ -729,7 +632,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_passes_with_two_sub_restrictions)
    sub_restriction2.argument = "market_fee_percent";
    sub_restriction2.value = uint16_t(200);
    
-   attribute_assert_restriction_v2 restriction;
+   attribute_assert_restriction restriction;
    restriction.argument = "common_options";
    restriction.restrictions = {restriction_holder(sub_restriction1), restriction_holder(sub_restriction2)};
    
@@ -749,7 +652,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_one_passes_sub_restrictions_an
    sub_restriction2.argument = "market_fee_percent";
    sub_restriction2.value = uint16_t(200);
    
-   attribute_assert_restriction_v2 restriction;
+   attribute_assert_restriction restriction;
    restriction.argument = "common_options";
    restriction.restrictions = {restriction_holder(sub_restriction1), restriction_holder(sub_restriction2)};
    
@@ -765,7 +668,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_eq_sub_restrictions)
    sub_restriction.argument = "market_fee_percent";
    sub_restriction.value = uint16_t(100);
    
-   attribute_assert_restriction_v2 restriction;
+   attribute_assert_restriction restriction;
    restriction.argument = "common_options";
    restriction.restrictions = {restriction_holder(sub_restriction)};
    
@@ -778,7 +681,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_succeeded_sub_re
    sub_restriction.argument = "market_fee_percent";
    sub_restriction.value = uint16_t(100);
    
-   attribute_assert_restriction_v2 restriction;
+   attribute_assert_restriction restriction;
    restriction.argument = "common_options";
    restriction.restrictions = {restriction_holder(sub_restriction)};
    
@@ -795,7 +698,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_several_succeede
    sub_restriction2.argument = "market_fee_percent";
    sub_restriction2.value = uint16_t(101);
    
-   attribute_assert_restriction_v2 restriction;
+   attribute_assert_restriction restriction;
    restriction.argument = "common_options";
    restriction.restrictions = {restriction_holder(sub_restriction1), restriction_holder(sub_restriction2)};
    
@@ -808,7 +711,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_failed_sub_restrict
    contains_all_restriction sub_restriction;
    sub_restriction.argument = "market_fee_percent";
    
-   attribute_assert_restriction_v2 restriction;
+   attribute_assert_restriction restriction;
    restriction.argument = "common_options";
    restriction.restrictions = {restriction_holder(sub_restriction)};
    
@@ -825,7 +728,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_one_failed_sub_rest
    sub_restriction2.argument = "market_fee_percent";
    sub_restriction2.value = uint16_t(101);
    
-   attribute_assert_restriction_v2 restriction;
+   attribute_assert_restriction restriction;
    restriction.argument = "common_options";
    restriction.restrictions = {restriction_holder(sub_restriction1), restriction_holder(sub_restriction2)};
    

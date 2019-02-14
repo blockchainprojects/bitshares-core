@@ -55,17 +55,6 @@ namespace {
       
       const restriction_v2& rest;
    };
-   
-   struct units_fetcher
-   {
-      typedef uint64_t result_type;
-      
-      template <typename T>
-      result_type operator () (const T& rest) const
-      {
-         return rest.get_units();
-      }
-   };
 }
    
 share_type custom_authority_create_operation::calculate_fee( const fee_parameters_type& k )const

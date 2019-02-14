@@ -34,6 +34,7 @@
 namespace graphene { namespace chain {
    
 typedef fc::static_variant<
+   vote_id_type,
    uint8_t,
    uint16_t,
    uint32_t,
@@ -215,19 +216,19 @@ inline int64_t to_integer(const unordered_map<K, T>& value)
 template <typename T>
 void is_type_supported_by_restriction()
 {
-   FC_THROW("Type is not supported by restriction. Typename = ${name}", ("name", fc::get_typename<T>::name()));
+   FC_THROW("Type is not supported by restriction.");
 }
    
 template <class T>
 bool is_equal(const T& left, const T& right)
 {
-   FC_THROW("Can't compare types. Type '${type_name}' doesn't support == operator.", ("type_name", fc::get_typename<T>::name()));
+   FC_THROW("Can't compare types. Type doesn't support == operator.");
 }
    
 template <typename T>
 const T& get(const generic_member& a_variant)
 {
-   FC_THROW("Can't fetch value. Type '${type_name}' is not supported for now.", ("type_name", fc::get_typename<T>::name()));
+   FC_THROW("Can't fetch value. Type is not supported for now.");
 }
 
 #define GRAPHENE_RESTRICTION_TYPE(type) \
