@@ -185,6 +185,15 @@ BOOST_AUTO_TEST_CASE( validate_eq_restriction_correctness_passes_when_argument_i
    BOOST_CHECK_NO_THROW(rest.validate<transfer_operation>());
 }
 
+BOOST_AUTO_TEST_CASE( validate_eq_restriction_correctness_fails_when_argument_name_is_not_correct )
+{
+   eq_restriction rest;
+   rest.value = asset(5);
+   rest.argument = "amount1";
+   
+   BOOST_CHECK_THROW(rest.validate<transfer_operation>(), fc::exception);
+}
+
 BOOST_AUTO_TEST_CASE( validate_contains_all_restriction_correctness_passes_when_argument_is_list )
 {
    contains_all_restriction rest;
@@ -285,7 +294,7 @@ BOOST_AUTO_TEST_CASE( validation_fails_for_neq_restriction_when_comparing_differ
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( validation_passes_for_any_restriction_when_argument_value_is_present_in_the_list_with_single_value)
+BOOST_AUTO_TEST_CASE( validation_passes_for_any_restriction_when_argument_value_is_present_in_the_list_with_single_value )
 {
    transfer_operation operation;
    operation.amount = asset(5);
@@ -321,7 +330,7 @@ BOOST_AUTO_TEST_CASE( validation_fails_for_any_restriction_when_argument_value_i
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( validation_passes_for_none_restriction_when_argument_value_is_not_present_in_the_empty_list)
+BOOST_AUTO_TEST_CASE( validation_passes_for_none_restriction_when_argument_value_is_not_present_in_the_empty_list )
 {
    transfer_operation operation;
    operation.amount = asset(4);
@@ -345,7 +354,7 @@ BOOST_AUTO_TEST_CASE( validation_passes_for_none_restriction_when_argument_value
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( validation_fails_for_none_restriction_when_argument_value_is_present_in_list)
+BOOST_AUTO_TEST_CASE( validation_fails_for_none_restriction_when_argument_value_is_present_in_list )
 {
    transfer_operation operation;
    operation.amount = asset(2);
@@ -357,7 +366,7 @@ BOOST_AUTO_TEST_CASE( validation_fails_for_none_restriction_when_argument_value_
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( validation_passes_for_conatins_all_restriction_when_argument_contains_list_values)
+BOOST_AUTO_TEST_CASE( validation_passes_for_conatins_all_restriction_when_argument_contains_list_values )
 {
    assert_operation operation;
    operation.required_auths = {account_id_type(1), account_id_type(2), account_id_type(3)};
@@ -369,7 +378,7 @@ BOOST_AUTO_TEST_CASE( validation_passes_for_conatins_all_restriction_when_argume
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( validation_failes_for_conatins_all_restriction_when_argument_contains_subset_of_list_values)
+BOOST_AUTO_TEST_CASE( validation_failes_for_conatins_all_restriction_when_argument_contains_subset_of_list_values )
 {
    assert_operation operation;
    operation.required_auths = {account_id_type(1), account_id_type(2), account_id_type(3)};
@@ -381,7 +390,7 @@ BOOST_AUTO_TEST_CASE( validation_failes_for_conatins_all_restriction_when_argume
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( validation_passes_for_conatins_all_restriction_when_argument_contains_superset_of_list_values)
+BOOST_AUTO_TEST_CASE( validation_passes_for_conatins_all_restriction_when_argument_contains_superset_of_list_values )
 {
    assert_operation operation;
    operation.required_auths = {account_id_type(0), account_id_type(1), account_id_type(2), account_id_type(3), account_id_type(4)};
@@ -393,7 +402,7 @@ BOOST_AUTO_TEST_CASE( validation_passes_for_conatins_all_restriction_when_argume
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( validation_passes_for_contains_none_restriction_when_argument_not_contains_any_of_list_values)
+BOOST_AUTO_TEST_CASE( validation_passes_for_contains_none_restriction_when_argument_not_contains_any_of_list_values )
 {
    assert_operation operation;
    operation.required_auths = {account_id_type(0), account_id_type(1), account_id_type(2)};
@@ -405,7 +414,7 @@ BOOST_AUTO_TEST_CASE( validation_passes_for_contains_none_restriction_when_argum
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( validation_fails_for_contains_none_restriction_when_argument_contained_any_of_list_values)
+BOOST_AUTO_TEST_CASE( validation_fails_for_contains_none_restriction_when_argument_contained_any_of_list_values )
 {
    assert_operation operation;
    operation.required_auths = {account_id_type(0), account_id_type(1), account_id_type(2)};
@@ -417,7 +426,7 @@ BOOST_AUTO_TEST_CASE( validation_fails_for_contains_none_restriction_when_argume
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( validation_fails_for_contains_none_restriction_when_argument_contained_several_of_list_values)
+BOOST_AUTO_TEST_CASE( validation_fails_for_contains_none_restriction_when_argument_contained_several_of_list_values )
 {
    assert_operation operation;
    operation.required_auths = {account_id_type(0), account_id_type(1), account_id_type(2)};
@@ -441,7 +450,7 @@ BOOST_AUTO_TEST_CASE( lt_restriction_passes_for_argument_less_than_value)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( lt_restriction_fails_for_argument_equals_to_value)
+BOOST_AUTO_TEST_CASE( lt_restriction_fails_for_argument_equals_to_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 50;
@@ -453,7 +462,7 @@ BOOST_AUTO_TEST_CASE( lt_restriction_fails_for_argument_equals_to_value)
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( lt_restriction_fails_for_argument_greater_than_value)
+BOOST_AUTO_TEST_CASE( lt_restriction_fails_for_argument_greater_than_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 60;
@@ -465,7 +474,7 @@ BOOST_AUTO_TEST_CASE( lt_restriction_fails_for_argument_greater_than_value)
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( le_restriction_passes_for_argument_less_than_value)
+BOOST_AUTO_TEST_CASE( le_restriction_passes_for_argument_less_than_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 50;
@@ -477,7 +486,7 @@ BOOST_AUTO_TEST_CASE( le_restriction_passes_for_argument_less_than_value)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( le_restriction_passes_for_argument_equals_to_value)
+BOOST_AUTO_TEST_CASE( le_restriction_passes_for_argument_equals_to_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 50;
@@ -489,7 +498,7 @@ BOOST_AUTO_TEST_CASE( le_restriction_passes_for_argument_equals_to_value)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( le_restriction_fails_for_argument_greater_than_value)
+BOOST_AUTO_TEST_CASE( le_restriction_fails_for_argument_greater_than_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 60;
@@ -501,7 +510,7 @@ BOOST_AUTO_TEST_CASE( le_restriction_fails_for_argument_greater_than_value)
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( gt_restriction_fails_for_argument_less_than_value)
+BOOST_AUTO_TEST_CASE( gt_restriction_fails_for_argument_less_than_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 50;
@@ -513,7 +522,7 @@ BOOST_AUTO_TEST_CASE( gt_restriction_fails_for_argument_less_than_value)
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( gt_restriction_fails_for_argument_equals_to_value)
+BOOST_AUTO_TEST_CASE( gt_restriction_fails_for_argument_equals_to_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 50;
@@ -525,7 +534,7 @@ BOOST_AUTO_TEST_CASE( gt_restriction_fails_for_argument_equals_to_value)
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( gt_restriction_passes_for_argument_greater_than_value)
+BOOST_AUTO_TEST_CASE( gt_restriction_passes_for_argument_greater_than_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 60;
@@ -537,7 +546,7 @@ BOOST_AUTO_TEST_CASE( gt_restriction_passes_for_argument_greater_than_value)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( ge_restriction_fails_for_argument_less_than_value)
+BOOST_AUTO_TEST_CASE( ge_restriction_fails_for_argument_less_than_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 50;
@@ -549,7 +558,7 @@ BOOST_AUTO_TEST_CASE( ge_restriction_fails_for_argument_less_than_value)
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( ge_restriction_passes_for_argument_equals_to_value)
+BOOST_AUTO_TEST_CASE( ge_restriction_passes_for_argument_equals_to_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 50;
@@ -561,7 +570,7 @@ BOOST_AUTO_TEST_CASE( ge_restriction_passes_for_argument_equals_to_value)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( ge_restriction_passes_for_argument_greater_than_value)
+BOOST_AUTO_TEST_CASE( ge_restriction_passes_for_argument_greater_than_value )
 {
    account_create_operation operation;
    operation.referrer_percent = 60;
@@ -573,7 +582,7 @@ BOOST_AUTO_TEST_CASE( ge_restriction_passes_for_argument_greater_than_value)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( optional_field_validation_passes_when_optional_is_empty)
+BOOST_AUTO_TEST_CASE( optional_field_validation_passes_when_optional_is_empty )
 {
    asset_update_operation operation;
    
@@ -584,7 +593,7 @@ BOOST_AUTO_TEST_CASE( optional_field_validation_passes_when_optional_is_empty)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( optional_field_validation_passes_when_optional_holds_correct_value)
+BOOST_AUTO_TEST_CASE( optional_field_validation_passes_when_optional_holds_correct_value )
 {
    asset_update_operation operation;
    operation.new_issuer = account_id_type(1);
@@ -596,7 +605,7 @@ BOOST_AUTO_TEST_CASE( optional_field_validation_passes_when_optional_holds_corre
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( optional_field_validation_fails_when_optional_holds_incorrect_value)
+BOOST_AUTO_TEST_CASE( optional_field_validation_fails_when_optional_holds_incorrect_value )
 {
    asset_update_operation operation;
    operation.new_issuer = account_id_type(2);
@@ -608,7 +617,7 @@ BOOST_AUTO_TEST_CASE( optional_field_validation_fails_when_optional_holds_incorr
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_passes_without_sub_restrictions)
+BOOST_AUTO_TEST_CASE( attribute_assert_passes_without_sub_restrictions )
 {
    asset_create_operation operation;
    
@@ -619,7 +628,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_passes_without_sub_restrictions)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_passes_with_two_sub_restrictions)
+BOOST_AUTO_TEST_CASE( attribute_assert_passes_with_two_sub_restrictions )
 {
    asset_create_operation operation;
    operation.common_options.market_fee_percent = 100;
@@ -639,18 +648,19 @@ BOOST_AUTO_TEST_CASE( attribute_assert_passes_with_two_sub_restrictions)
    BOOST_CHECK_NO_THROW(restriction.validate(operation));
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_one_passes_sub_restrictions_and_one_failed)
+BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_one_passes_sub_restrictions_and_one_failed )
 {
    asset_create_operation operation;
    operation.common_options.market_fee_percent = 100;
+   operation.common_options.flags = 1;
    
    eq_restriction sub_restriction1;
    sub_restriction1.argument = "market_fee_percent";
    sub_restriction1.value = uint16_t(100);
    
    eq_restriction sub_restriction2;
-   sub_restriction2.argument = "market_fee_percent";
-   sub_restriction2.value = uint16_t(200);
+   sub_restriction2.argument = "flags";
+   sub_restriction2.value = uint16_t(2);
    
    attribute_assert_restriction restriction;
    restriction.argument = "common_options";
@@ -659,7 +669,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_one_passes_sub_restrictions_an
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_eq_sub_restrictions)
+BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_eq_sub_restrictions )
 {
    asset_create_operation operation;
    operation.common_options.market_fee_percent = 101;
@@ -675,7 +685,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_eq_sub_restrictions)
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_succeeded_sub_restriction)
+BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_succeeded_sub_restriction )
 {
    eq_restriction sub_restriction;
    sub_restriction.argument = "market_fee_percent";
@@ -688,7 +698,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_succeeded_sub_re
    BOOST_CHECK_NO_THROW(restriction.validate<asset_create_operation>());
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_several_succeeded_sub_restriction)
+BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_several_succeeded_sub_restriction )
 {
    eq_restriction sub_restriction1;
    sub_restriction1.argument = "market_fee_percent";
@@ -705,7 +715,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_several_succeede
    BOOST_CHECK_NO_THROW(restriction.validate<asset_create_operation>());
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_failed_sub_restriction)
+BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_failed_sub_restriction )
 {
    //should fail because argument is not a list
    contains_all_restriction sub_restriction;
@@ -718,7 +728,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_failed_sub_restrict
    BOOST_CHECK_THROW(restriction.validate<asset_create_operation>(), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_one_failed_sub_restriction_and_one_succeeded)
+BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_one_failed_sub_restriction_and_one_succeeded )
 {
    //should fail because argument is not a list
    contains_all_restriction sub_restriction1;

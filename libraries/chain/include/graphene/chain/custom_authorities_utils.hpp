@@ -71,10 +71,10 @@ typedef fc::static_variant<
 template <typename T, typename Action>
 struct member_visitor
 {
-   member_visitor(const std::string& member_name, const Action& action, const T& object)
-   : m_member_name(member_name)
-   , m_action(action)
-   , m_object(object)
+   member_visitor(const std::string& a_member_name, const Action& an_action, const T& an_object)
+   : member_name(a_member_name)
+   , action(an_action)
+   , object(an_object)
    {}
    
    typedef void result_type;
@@ -82,16 +82,15 @@ struct member_visitor
    template<typename Member, class Class, Member (Class::*member)>
    void operator () ( const char* name ) const
    {
-      if (name == m_member_name)
+      if (name == member_name)
       {
-         m_action(m_object.*member);
+         action(object.*member);
       }
    }
    
-private:
-   const std::string m_member_name;
-   Action m_action;
-   T m_object;
+   const std::string member_name;
+   Action action;
+   T object;
 };
 
 template <typename Action>
@@ -152,6 +151,28 @@ struct is_fc_reflected_object
 {
    static const bool value = fc::reflector<T>::is_defined::value;
 };
+   
+struct is_argument_present
+{
+   template <typename T>
+   void operator() (const T&) const
+   {
+      agument_is_present = true;
+   }
+   
+   mutable bool agument_is_present = false;
+};
+   
+template <typename Operation>
+void check_operation_argument_is_present(const std::string& argument)
+{
+   member_visitor<Operation, is_argument_present> visitor(argument,
+                                                          is_argument_present(),
+                                                          Operation());
+   fc::reflector<Operation>::visit(visitor);
+   
+   FC_ASSERT(visitor.action.agument_is_present, "Argument {argument} was not present.", ("argument", argument));
+}
    
 template <typename T>
 int64_t to_integer(const T& value)

@@ -70,7 +70,7 @@ struct custom_authorities_operations_fixture: database_fixture
       trx.operations.clear();
    }
    
-   void update_account( const account_object& account)
+   void update_account( const account_object& account )
    {
       trx.operations.clear();
       
@@ -85,7 +85,7 @@ struct custom_authorities_operations_fixture: database_fixture
       trx.clear();
    }
    
-   void push_transfer_operation_from_nathan_to_core(const fc::optional<fc::ecc::private_key>& key_for_singing = {})
+   void push_transfer_operation_from_nathan_to_core( const fc::optional<fc::ecc::private_key>& key_for_singing = {} )
    {
       transfer_operation op;
       op.from = nathan->id;
@@ -94,7 +94,7 @@ struct custom_authorities_operations_fixture: database_fixture
       
       trx.operations = {op};
       
-      if (key_for_singing)
+      if ( key_for_singing )
       {
          sign(trx, *key_for_singing);
       }
@@ -112,7 +112,7 @@ struct custom_authorities_operations_fixture: database_fixture
 
 BOOST_FIXTURE_TEST_SUITE( custom_authorities_operations, custom_authorities_operations_fixture )
 
-BOOST_AUTO_TEST_CASE(get_custom_authorities_by_account_without_authorities) {
+BOOST_AUTO_TEST_CASE( get_custom_authorities_by_account_without_authorities ) {
    try {
       auto dan = create_account("dan");
       
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(get_custom_authorities_by_account_without_authorities) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(get_custom_authorities_by_account_without_authorities_but_with_authorities_for_another_account) {
+BOOST_AUTO_TEST_CASE( get_custom_authorities_by_account_without_authorities_but_with_authorities_for_another_account ) {
    try {
       auto dan = create_account("dan");
       auto sam = create_account("sam");
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(get_custom_authorities_by_account_without_authorities_but_w
    }
 }
 
-BOOST_AUTO_TEST_CASE(create_custom_authority_operation_adds_authority_to_db) {
+BOOST_AUTO_TEST_CASE( create_custom_authority_operation_adds_authority_to_db ) {
    try {
       auto dan = create_account("dan");
 
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(create_custom_authority_operation_adds_authority_to_db) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(delete_custom_authority) {
+BOOST_AUTO_TEST_CASE( delete_custom_authority ) {
    try {
       auto dan = create_account("dan");
       
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(delete_custom_authority) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(custom_authority_is_disabled_after_account_update) {
+BOOST_AUTO_TEST_CASE( custom_authority_is_disabled_after_account_update ) {
    try {
       auto dan = create_account("dan");
       
@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE(custom_authority_is_disabled_after_account_update) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(custom_authority_is_disabled_after_account_update_with_serveral_accounts) {
+BOOST_AUTO_TEST_CASE( custom_authority_is_disabled_after_account_update_with_serveral_accounts ) {
    try {
       auto dan = create_account("dan");
       
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(custom_authority_is_disabled_after_account_update_with_serv
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_passes_without_authorities_installed) {
+BOOST_AUTO_TEST_CASE( transaction_passes_without_authorities_installed ) {
    try {
       
       BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_core(nathan_key));
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(transaction_passes_without_authorities_installed) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_fails_with_authorities_installed) {
+BOOST_AUTO_TEST_CASE( transaction_fails_with_authorities_installed ) {
    try {
       custom_authority_create_operation op;
       op.account = nathan->id;
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(transaction_fails_with_authorities_installed) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_passes_with_authorities_installed) {
+BOOST_AUTO_TEST_CASE( transaction_passes_with_authorities_installed ) {
    try {
       create_custom_authority(nathan->id, true, int_from_operation_type<transfer_operation>::value);
       
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(transaction_passes_with_authorities_installed) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_passes_with_one_authority_passed_and_one_failed) {
+BOOST_AUTO_TEST_CASE( transaction_passes_with_one_authority_passed_and_one_failed ) {
    try {
       create_custom_authority(nathan->id, true, int_from_operation_type<custom_authority_create_operation>::value);
       create_custom_authority(nathan->id, true, int_from_operation_type<transfer_operation>::value);
@@ -386,7 +386,7 @@ BOOST_AUTO_TEST_CASE(transaction_passes_with_one_authority_passed_and_one_failed
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_fails_with_one_authority_failed_and_one_disabled) {
+BOOST_AUTO_TEST_CASE( transaction_fails_with_one_authority_failed_and_one_disabled ) {
    try {
       create_custom_authority(nathan->id, true, int_from_operation_type<custom_authority_create_operation>::value);
       create_custom_authority(nathan->id, false, int_from_operation_type<transfer_operation>::value);
@@ -401,7 +401,7 @@ BOOST_AUTO_TEST_CASE(transaction_fails_with_one_authority_failed_and_one_disable
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_fails_with_one_failed_restriction) {
+BOOST_AUTO_TEST_CASE( transaction_fails_with_one_failed_restriction ) {
    try {
       
       eq_restriction restriction;
@@ -420,7 +420,7 @@ BOOST_AUTO_TEST_CASE(transaction_fails_with_one_failed_restriction) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_fails_with_wrong_signature) {
+BOOST_AUTO_TEST_CASE( transaction_fails_with_wrong_signature ) {
    try {
       create_custom_authority(nathan->id, true, int_from_operation_type<transfer_operation>::value);
       
@@ -434,7 +434,7 @@ BOOST_AUTO_TEST_CASE(transaction_fails_with_wrong_signature) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_fails_without_signature) {
+BOOST_AUTO_TEST_CASE( transaction_fails_without_signature ) {
    try {
       create_custom_authority(nathan->id, true, int_from_operation_type<transfer_operation>::value);
       
@@ -448,7 +448,7 @@ BOOST_AUTO_TEST_CASE(transaction_fails_without_signature) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(transaction_succeeds_with_one_restriction) {
+BOOST_AUTO_TEST_CASE( transaction_succeeds_with_one_restriction ) {
    try {
       eq_restriction restriction;
       restriction.value = asset(500);
@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE(transaction_succeeds_with_one_restriction) {
    }
 }
 
-BOOST_AUTO_TEST_CASE(limit_order_succeeds_with_custom_authority)
+BOOST_AUTO_TEST_CASE( limit_order_succeeds_with_custom_authority )
 {
    create_custom_authority(nathan->id, true, int_from_operation_type<limit_order_create_operation>::value);
    
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE(limit_order_succeeds_with_custom_authority)
    BOOST_CHECK_NO_THROW(PUSH_TX( db, trx, ~0 ));
 }
 
-BOOST_AUTO_TEST_CASE(limit_order_fails_with_custom_authority)
+BOOST_AUTO_TEST_CASE( limit_order_fails_with_custom_authority )
 {
    neq_restriction restriction;
    restriction.value = asset(500);

@@ -73,6 +73,8 @@ struct base_restriction
                                                                     is_type_supported_by_base_restriction(),
                                                                     Operation());
       fc::reflector<Operation>::visit(visitor);
+      
+      check_operation_argument_is_present<Operation>(argument);
    }
    
    uint64_t get_units()const
@@ -101,6 +103,8 @@ struct base_list_restriction
    {
       member_visitor<Operation, is_type_supported_by_base_list_restriction> visitor(argument, is_type_supported_by_base_list_restriction(), Operation());
       fc::reflector<Operation>::visit(visitor);
+      
+      check_operation_argument_is_present<Operation>(argument);
    }
    
    uint64_t get_units() const
@@ -133,7 +137,9 @@ struct base_comparision_restriction
    
    template <typename Operation>
    void validate() const // should support all arguments of all operations
-   {}
+   {
+      check_operation_argument_is_present<Operation>(argument);
+   }
    
    uint64_t get_units()const
    {
@@ -491,8 +497,8 @@ void sub_restriction_checker::operator () (const T& obj, fc::true_type reflector
 template <class T>
 void sub_restriction_validator::operator () (const T& obj) const
 {
-   //this is need to separate simple types as int, string from bitahsers types like operations and other objects
-   //for starndard types this should not be applied
+   //this is nessesary to separate simple types as int, string from bitshares types like operations and other objects
+   //for standard types this should not be applied
    typename fc::reflector<T>::is_defined reflector_is_defined;
    operator() (obj, reflector_is_defined);
 }
@@ -509,7 +515,7 @@ void sub_restriction_validator::operator () (const T& obj, fc::true_type reflect
 template <class T>
 void sub_restriction_validator::operator () (const T&, fc::false_type reflector_is_defined) const
 {
-   FC_THROW("Attribute assert can get sub fileds of the object.");
+   FC_THROW("Attribute assert can get sub fields of the object.");
 }
 
 template <class T>
@@ -531,6 +537,8 @@ void attribute_assert_restriction::validate() const
                                       sub_restriction_validator(restrictions),
                                       Operation());
    fc::reflector<Operation>::visit(visitor);
+   
+   check_operation_argument_is_present<Operation>(argument);
 }
 
 template <typename Operation>
