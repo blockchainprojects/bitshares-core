@@ -77,6 +77,7 @@ share_type custom_authority_create_operation::calculate_fee( const fee_parameter
    {
       share_type unit_fee = k.price_per_k_unit;
       unit_fee *= (valid_to - valid_from).to_seconds();
+      unit_fee *= auth.num_auths();
       uint64_t restriction_units = 0;
       for( const auto& r : restrictions )
       {
