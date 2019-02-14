@@ -288,10 +288,8 @@ void verify_authority( const vector<operation>& ops, const flat_set<public_key_t
             operation_verified |= (custom_auth.validate(op) && s.check_authority(&custom_auth.auth));
          }
          
-         FC_ASSERT(operation_verified, "Failed to verify operation");
+         GRAPHENE_ASSERT( operation_verified, tx_missing_custom_auth, "Missing Custom Authority for Account ${id}", ("id",id));
       }
-      
-      //validate auth in custom authes
    }
    s.max_recursion = max_recursion_depth;
    for( auto& id : active_aprovals )
@@ -419,12 +417,12 @@ void signed_transaction::verify_authority(
    const std::function<const authority*(account_id_type)>& get_owner,
    uint32_t max_recursion )const
 {
-   verify_authority_ex(chain_id, get_active, get_owner,
-                       [](account_id_type) { return std::vector<custom_authority_object>(); },
-                       max_recursion);
+   verify_authority(chain_id, get_active, get_owner,
+                    [](account_id_type) { return std::vector<custom_authority_object>(); },
+                    max_recursion);
 }
 
-void signed_transaction::verify_authority_ex(
+void signed_transaction::verify_authority(
                                           const chain_id_type& chain_id,
                                           const std::function<const authority*(account_id_type)>& get_active,
                                           const std::function<const authority*(account_id_type)>& get_owner,

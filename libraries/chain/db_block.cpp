@@ -666,20 +666,25 @@ processed_transaction database::_apply_transaction(const signed_transaction& trx
    {
       auto get_active = [&]( account_id_type id ) { return &id(*this).active; };
       auto get_owner  = [&]( account_id_type id ) { return &id(*this).owner;  };
-      auto get_custom_authorities  =  [&]( account_id_type id ) -> std::vector<custom_authority_object>
-      {
-         auto custom_auths = get_custom_authorities_by_account(id);
-         auto enabled_authorities = filter_enabled_custom_authorities(custom_auths);
-         auto valid_authorities = filter_valid_custom_authorities(enabled_authorities, head_block_time());
-         
-         return valid_authorities;
-      };
+      auto get_custom_authorities = [&]( account_id_type id ) -> std::vector<custom_authority_object>
+         {
+            if ( head_block_time() > HARDFORK_CORE_1285_TIME )
+            {
+               auto custom_auths = get_custom_authorities_by_account(id);
+               auto enabled_authorities = filter_enabled_custom_authorities(custom_auths);
+               auto valid_authorities = filter_valid_custom_authorities(enabled_authorities, head_block_time());
+               
+               return valid_authorities;
+            }
+            
+            return {};
+         };
       
-      trx.verify_authority_ex( chain_id,
-                               get_active,
-                               get_owner,
-                               get_custom_authorities,
-                               get_global_properties().parameters.max_authority_depth );
+      trx.verify_authority( chain_id,
+                            get_active,
+                            get_owner,
+                            get_custom_authorities,
+                            get_global_properties().parameters.max_authority_depth );
    }
 
    //Skip all manner of expiration and TaPoS checking if we're on block 1; It's impossible that the transaction is
