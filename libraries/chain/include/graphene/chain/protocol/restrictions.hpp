@@ -68,7 +68,10 @@ struct base_restriction
    template <typename Operation>
    void validate() const
    {
-      member_visitor<Operation, is_type_supported_by_base_restriction> visitor(argument, is_type_supported_by_base_restriction(), Operation());
+      member_visitor<Operation,
+                     is_type_supported_by_base_restriction> visitor(argument,
+                                                                    is_type_supported_by_base_restriction(),
+                                                                    Operation());
       fc::reflector<Operation>::visit(visitor);
    }
    
