@@ -1179,7 +1179,7 @@ public:
                                               int operation_type,
                                               time_point_sec valid_from,
                                               time_point_sec valid_to,
-                                              vector<restriction_v2> restrictions)
+                                              vector<restriction> restrictions)
    { try {
       FC_ASSERT( !self.is_locked() );
       
@@ -1210,7 +1210,7 @@ public:
                                               optional<unsigned_int> operation_type,
                                               optional<bool> enabled,
                                               optional<time_point_sec> valid_to,
-                                              optional<vector<restriction_v2>> restrictions)
+                                              optional<vector<restriction>> restrictions)
    { try {
       custom_authority_update_operation op;
       op.custom_authority_to_update = custom_auth;
@@ -3503,7 +3503,7 @@ signed_transaction wallet_api::create_custom_authority(account_id_type account,
                                                        int operation_type,
                                                        time_point_sec valid_from,
                                                        time_point_sec valid_to,
-                                                       vector<restriction_v2> restrictions)
+                                                       vector<restriction> restrictions)
 {
    return my->create_custom_authority(account, auth, operation_type, valid_from, valid_to, restrictions);
 }
@@ -3518,7 +3518,7 @@ signed_transaction wallet_api::update_custom_authority(object_id_type custom_aut
                                                        optional<unsigned_int> operation_type,
                                                        optional<bool> enabled,
                                                        optional<time_point_sec> valid_to,
-                                                       optional<vector<restriction_v2>> restrictions)
+                                                       optional<vector<restriction>> restrictions)
 {
    return my->update_custom_authority(custom_auth, auth, operation_type, enabled, valid_to, restrictions);
 }

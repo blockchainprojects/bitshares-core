@@ -24,7 +24,7 @@
 
 #include <graphene/chain/custom_authority_object.hpp>
 #include <fc/reflect/reflect.hpp>
-#include <graphene/chain/operation_type_to_id.hpp>
+#include <graphene/chain/int_from_operation_type.hpp>
 
 using namespace graphene::chain;
 
@@ -45,7 +45,7 @@ namespace  {
    
    struct operation_validation_visitor
    {
-      restriction_v2 rest;
+      restriction rest;
       
       typedef void result_type;
       
@@ -59,7 +59,7 @@ namespace  {
       }
    };
    
-   void validate_operation_by_restriction( const operation& op, const restriction_v2& rest )
+   void validate_operation_by_restriction( const operation& op, const restriction& rest )
    {
       operation_validation_visitor operation_validator;
       operation_validator.rest = rest;

@@ -23,7 +23,7 @@
  */
 #include <graphene/chain/protocol/custom_authority.hpp>
 #include <graphene/chain/protocol/operations.hpp>
-#include <graphene/chain/operation_type_to_id.hpp>
+#include <graphene/chain/int_from_operation_type.hpp>
 
 namespace graphene { namespace chain {
 
@@ -42,7 +42,7 @@ namespace {
    
    struct operation_type_checker
    {
-      operation_type_checker(const restriction_v2& a_rest)
+      operation_type_checker(const restriction& a_rest)
       : rest(a_rest)
       {}
       
@@ -53,7 +53,7 @@ namespace {
          rest.visit(visitor);
       }
       
-      const restriction_v2& rest;
+      const restriction& rest;
    };
 }
    

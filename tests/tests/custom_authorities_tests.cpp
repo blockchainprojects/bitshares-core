@@ -29,7 +29,7 @@
 #include <graphene/chain/protocol/operations.hpp>
 #include <graphene/chain/account_object.hpp>
 #include <graphene/chain/custom_authorities_utils.hpp>
-#include <graphene/chain/operation_type_to_id.hpp>
+#include <graphene/chain/int_from_operation_type.hpp>
 
 using namespace graphene::chain;
 

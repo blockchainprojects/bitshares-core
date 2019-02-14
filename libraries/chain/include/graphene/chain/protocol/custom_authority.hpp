@@ -23,7 +23,6 @@
  */
 #pragma once
 #include <graphene/chain/protocol/base.hpp>
-#include <graphene/chain/protocol/restriction.hpp>
 #include <graphene/chain/protocol/restrictions.hpp>
 
 namespace graphene { namespace chain {
@@ -47,7 +46,7 @@ namespace graphene { namespace chain {
       time_point_sec valid_from;
       time_point_sec valid_to;
       unsigned_int operation_type;
-      vector<restriction_v2> restrictions;
+      vector<restriction> restrictions;
 
       empty_extensions_type extensions;
 
@@ -77,7 +76,7 @@ namespace graphene { namespace chain {
       optional<bool> enabled;
       optional<time_point_sec> valid_to;
       optional<unsigned_int> operation_type;
-      optional<vector<restriction_v2>> restrictions;
+      optional<vector<restriction>> restrictions;
       
       uint64_t delta_units; // to calculate fee, it will be validated in evaluator
                             // Note: if start was in the past, when updating, used fee should be deducted

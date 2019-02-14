@@ -25,7 +25,7 @@
 #include <boost/test/unit_test.hpp>
 #include <graphene/chain/protocol/custom_authority.hpp>
 #include <graphene/chain/custom_authority_object.hpp>
-#include <graphene/chain/operation_type_to_id.hpp>
+#include <graphene/chain/int_from_operation_type.hpp>
 #include <fc/crypto/digest.hpp>
 
 #include "../common/database_fixture.hpp"
@@ -49,7 +49,7 @@ struct custom_authorities_operations_fixture: database_fixture
    void create_custom_authority(const account_id_type& account,
                                 bool enabled,
                                 int operation_type,
-                                const std::vector<restriction_v2>& restrictions = {})
+                                const std::vector<restriction>& restrictions = {})
    {
       custom_authority_create_operation op; 
       op.account = account;

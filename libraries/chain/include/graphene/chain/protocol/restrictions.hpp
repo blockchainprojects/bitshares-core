@@ -457,21 +457,21 @@ typedef fc::static_variant<eq_restriction,
                            none_restriction,
                            contains_all_restriction,
                            contains_none_restriction,
-                           attribute_assert_restriction> restriction_v2;
+                           attribute_assert_restriction> restriction;
    
 struct restriction_holder
 {
    restriction_holder() = default;
    
-   restriction_holder(const restriction_v2& a_rest)
+   restriction_holder(const restriction& a_rest)
    : rest(a_rest)
    {}
    
-   restriction_v2 rest;
+   restriction rest;
 };
 
 template <typename Operation>
-void validate_operation_type(const restriction_v2& rest);
+void validate_operation_type(const restriction& rest);
 
 template <class T>
 void sub_restriction_checker::operator () (const T& obj) const
@@ -542,7 +542,7 @@ void attribute_assert_restriction::validate() const
 }
 
 template <typename Operation>
-void validate_operation_type(const restriction_v2& rest)
+void validate_operation_type(const restriction& rest)
 {
    restriction_validator_visitor<Operation> visitor;
    rest.visit(visitor);

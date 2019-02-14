@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include <graphene/chain/operation_type_to_id.hpp>
+#include <graphene/chain/int_from_operation_type.hpp>
 
 namespace graphene { namespace chain {
    

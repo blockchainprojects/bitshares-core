@@ -848,7 +848,7 @@ class wallet_api
                                                  int operation_type,
                                                  time_point_sec valid_from,
                                                  time_point_sec valid_to,
-                                                 vector<restriction_v2> restrictions);
+                                                 vector<restriction> restrictions);
    
       /**
        * Lists custom authorities bound to specified account
@@ -874,7 +874,7 @@ class wallet_api
                                                  optional<unsigned_int> operation_type,
                                                  optional<bool> enabled,
                                                  optional<time_point_sec> valid_from,
-                                                 optional<vector<restriction_v2>> restrictions);
+                                                 optional<vector<restriction>> restrictions);
    
       /**
        * Deletes custom authority specified by id
