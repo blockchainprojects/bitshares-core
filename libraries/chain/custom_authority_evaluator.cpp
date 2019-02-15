@@ -34,6 +34,7 @@ void_result custom_authority_create_evaluator::do_evaluate(const custom_authorit
 { try {
    FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
              "custom_authority_create_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
