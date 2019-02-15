@@ -70,7 +70,7 @@ namespace graphene { namespace chain {
       object_id_type custom_authority_to_update;
       
       asset fee;
-      account_id_type account;
+      account_id_type fee_paying_account;
       
       optional<authority> auth;
       optional<bool> enabled;
@@ -83,7 +83,7 @@ namespace graphene { namespace chain {
       
       empty_extensions_type extensions;
 
-      account_id_type fee_payer()const { return account; }
+      account_id_type fee_payer()const { return fee_paying_account; }
       void            validate()const;
       share_type      calculate_fee(const fee_parameters_type& k)const;
    };
@@ -100,9 +100,9 @@ namespace graphene { namespace chain {
       object_id_type custom_authority_to_delete;
       
       asset fee;
-      account_id_type account;
+      account_id_type fee_paying_account;
 
-      account_id_type fee_payer()const { return account; }
+      account_id_type fee_payer()const { return fee_paying_account; }
       void            validate()const;
    };
 
@@ -127,7 +127,7 @@ FC_REFLECT( graphene::chain::custom_authority_create_operation,
 FC_REFLECT( graphene::chain::custom_authority_update_operation,
             (fee)
             (custom_authority_to_update)
-            (account)
+            (fee_paying_account)
             (auth)
             (enabled)
             (valid_to)
@@ -139,5 +139,5 @@ FC_REFLECT( graphene::chain::custom_authority_update_operation,
 FC_REFLECT( graphene::chain::custom_authority_delete_operation,
             (fee)
             (custom_authority_to_delete)
-            (account)
+            (fee_paying_account)
            )

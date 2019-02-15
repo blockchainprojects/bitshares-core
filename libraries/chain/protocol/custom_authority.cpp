@@ -113,11 +113,11 @@ void custom_authority_update_operation::validate()const
 {
    FC_ASSERT( fee.amount >= 0, "Fee amount can not be negative" );
 
-   FC_ASSERT( account != GRAPHENE_TEMP_ACCOUNT
-              && account != GRAPHENE_COMMITTEE_ACCOUNT
-              && account != GRAPHENE_WITNESS_ACCOUNT
-              && account != GRAPHENE_RELAXED_COMMITTEE_ACCOUNT,
-              "Can not create custom authority for special accounts" );
+   FC_ASSERT( fee_paying_account != GRAPHENE_TEMP_ACCOUNT
+              && fee_paying_account != GRAPHENE_COMMITTEE_ACCOUNT
+              && fee_paying_account != GRAPHENE_WITNESS_ACCOUNT
+              && fee_paying_account != GRAPHENE_RELAXED_COMMITTEE_ACCOUNT,
+              "Can not update custom authority for special accounts" );
    
    if ( restrictions )
    {
@@ -130,6 +130,13 @@ void custom_authority_update_operation::validate()const
 
 void custom_authority_delete_operation::validate()const
 {
+   FC_ASSERT( fee.amount >= 0, "Fee amount can not be negative" );
+   
+   FC_ASSERT( fee_paying_account != GRAPHENE_TEMP_ACCOUNT
+             && fee_paying_account != GRAPHENE_COMMITTEE_ACCOUNT
+             && fee_paying_account != GRAPHENE_WITNESS_ACCOUNT
+             && fee_paying_account != GRAPHENE_RELAXED_COMMITTEE_ACCOUNT,
+             "Can not update custom authority for special accounts" );
 }
 
 } } // graphene::chain

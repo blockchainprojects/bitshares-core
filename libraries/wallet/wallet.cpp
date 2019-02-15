@@ -1220,6 +1220,8 @@ public:
       op.operation_type = operation_type;
       op.restrictions = restrictions;
       
+      op.fee_paying_account = get_object<custom_authority_object>(custom_auth).account;
+      
       signed_transaction tx;
       tx.operations = {op};
       set_operation_fees( tx, _remote_db->get_global_properties().parameters.current_fees );
@@ -1228,10 +1230,12 @@ public:
       return sign_transaction( tx, true );
    } FC_CAPTURE_AND_RETHROW ( (auth)(operation_type) ) }
    
-   signed_transaction delete_custom_authority(object_id_type auth)
+   signed_transaction delete_custom_authority(object_id_type custom_auth)
    { try {
       custom_authority_delete_operation op;
-      op.custom_authority_to_delete = auth;
+      op.custom_authority_to_delete = custom_auth;
+      
+      op.fee_paying_account = get_object<custom_authority_object>(custom_auth).account;
       
       signed_transaction tx;
       tx.operations = {op};
@@ -1239,7 +1243,7 @@ public:
       tx.validate();
       
       return sign_transaction( tx, true );
-   } FC_CAPTURE_AND_RETHROW ( (auth) ) }
+   } FC_CAPTURE_AND_RETHROW ( (custom_auth) ) }
    
    signed_transaction create_asset(string issuer,
                                    string symbol,

@@ -72,8 +72,6 @@ void_result custom_authority_update_evaluator::do_apply(const custom_authority_u
    
    d.modify( d.get<custom_authority_object>(op.custom_authority_to_update), [&]( custom_authority_object& obj ){
       
-      obj.account = op.account;
-      
       if (op.auth)
       {
          obj.auth = *op.auth;
