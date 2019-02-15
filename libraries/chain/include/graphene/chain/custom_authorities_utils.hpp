@@ -64,6 +64,7 @@ typedef fc::static_variant<
    future_extensions,
    vector<predicate>,
    authority,
+   vesting_balance_id_type,
    flat_set<account_id_type>,
    flat_set<public_key_type>
    > generic_member;
@@ -290,6 +291,7 @@ template <> inline void is_type_supported_by_restriction<type>() {} \
    GRAPHENE_RESTRICTION_TYPE(future_extensions);
    GRAPHENE_RESTRICTION_TYPE(vector<predicate>);
    GRAPHENE_RESTRICTION_TYPE(authority);
+   GRAPHENE_RESTRICTION_TYPE(vesting_balance_id_type);
    GRAPHENE_RESTRICTION_TYPE(flat_set<account_id_type>);
    GRAPHENE_RESTRICTION_TYPE(flat_set<public_key_type>);
 

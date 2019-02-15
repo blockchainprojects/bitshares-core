@@ -287,7 +287,11 @@ void verify_authority( const vector<operation>& ops, const flat_set<public_key_t
          bool operation_verified = false;
          for ( auto custom_auth: custom_authes )
          {
-            operation_verified |= (custom_auth.validate(op) && s.check_authority(&custom_auth.auth));
+            operation_verified = custom_auth.validate(op) && (s.check_authority(&custom_auth.auth) || s.check_authority(id));
+            if ( operation_verified )
+            {
+               break;
+            }
          }
          
          GRAPHENE_ASSERT( operation_verified, tx_missing_custom_auth, "Missing Custom Authority for Account ${id}", ("id",id));
