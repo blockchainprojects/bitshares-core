@@ -260,6 +260,7 @@ inline const type& get<type>(const generic_member& a_variant) { return a_variant
 \
 template <> inline void is_type_supported_by_restriction<type>() {} \
 
+   GRAPHENE_RESTRICTION_TYPE(vote_id_type);
    GRAPHENE_RESTRICTION_TYPE(uint8_t);
    GRAPHENE_RESTRICTION_TYPE(uint16_t);
    GRAPHENE_RESTRICTION_TYPE(uint32_t);

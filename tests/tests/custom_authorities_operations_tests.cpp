@@ -85,7 +85,7 @@ struct custom_authorities_operations_fixture: database_fixture
       trx.clear();
    }
    
-   void push_transfer_operation_from_nathan_to_core( const fc::optional<fc::ecc::private_key>& key_for_singing = {} )
+   void push_transfer_operation_from_nathan_to_core( const fc::optional<fc::ecc::private_key>& key_for_signing = {} )
    {
       transfer_operation op;
       op.from = nathan->id;
@@ -94,9 +94,9 @@ struct custom_authorities_operations_fixture: database_fixture
       
       trx.operations = {op};
       
-      if ( key_for_singing )
+      if ( key_for_signing )
       {
-         sign(trx, *key_for_singing);
+         sign(trx, *key_for_signing);
       }
       
       PUSH_TX( db, trx, database::skip_transaction_dupe_check );

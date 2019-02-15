@@ -49,6 +49,12 @@ struct is_type_supported_by_base_list_restriction
    {
       is_type_supported_by_restriction<T>();
    }
+   
+   template <class T>
+   void operator () (const vector<T>&) const
+   {
+      is_type_supported_by_restriction<T>();
+   }
 };
    
 template <typename Action>

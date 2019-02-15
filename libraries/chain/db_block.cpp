@@ -57,10 +57,10 @@ namespace {
       return result;
    }
    
-   vector< custom_authority_object > filter_valid_custom_authorities( const vector< custom_authority_object >& custom_authorities, fc::time_point_sec now)
+   vector< custom_authority_object > filter_valid_custom_authorities( const vector< custom_authority_object >& custom_authorities, fc::time_point_sec now )
    {
       vector< custom_authority_object > result;
-      for (auto& auth: custom_authorities)
+      for ( auto& auth: custom_authorities )
       {
          if ( auth.valid_from < now && now < auth.valid_to )
          {

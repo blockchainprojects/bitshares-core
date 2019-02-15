@@ -278,6 +278,8 @@ void verify_authority( const vector<operation>& ops, const flat_set<public_key_t
          auto custom_authes = get_custom_authorities(id);
          if ( custom_authes.empty() )
          {
+            //if custom athorities are absent then add account to the required list
+            //skip all custom auth checks and go to the next account
             required_active.insert(id);
             break;
          }

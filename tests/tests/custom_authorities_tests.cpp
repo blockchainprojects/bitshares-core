@@ -685,7 +685,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_fails_with_eq_sub_restrictions )
    BOOST_CHECK_THROW(restriction.validate(operation), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_succeeded_sub_restriction )
+BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_correct_sub_restriction )
 {
    eq_restriction sub_restriction;
    sub_restriction.argument = "market_fee_percent";
@@ -698,7 +698,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_succeeded_sub_re
    BOOST_CHECK_NO_THROW(restriction.validate<asset_create_operation>());
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_several_succeeded_sub_restriction )
+BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_several_correct_sub_restriction )
 {
    eq_restriction sub_restriction1;
    sub_restriction1.argument = "market_fee_percent";
@@ -715,7 +715,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_succeeds_with_several_succeede
    BOOST_CHECK_NO_THROW(restriction.validate<asset_create_operation>());
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_failed_sub_restriction )
+BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_invalid_sub_restriction )
 {
    //should fail because argument is not a list
    contains_all_restriction sub_restriction;
@@ -728,7 +728,7 @@ BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_failed_sub_restrict
    BOOST_CHECK_THROW(restriction.validate<asset_create_operation>(), fc::exception);
 }
 
-BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_one_failed_sub_restriction_and_one_succeeded )
+BOOST_AUTO_TEST_CASE( attribute_assert_vaildation_fails_with_one_incorrect_sub_restriction_and_one_correct )
 {
    //should fail because argument is not a list
    contains_all_restriction sub_restriction1;
