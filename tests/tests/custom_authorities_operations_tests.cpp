@@ -468,6 +468,20 @@ BOOST_AUTO_TEST_CASE( transaction_fails_with_wrong_signature ) {
    }
 }
 
+BOOST_AUTO_TEST_CASE( transaction_succeeds_with_failed_custom_auth_but_signed_by_active_auth ) {
+   try {
+      create_custom_authority(nathan->id, true, int_from_operation_type<custom_authority_create_operation>::value);
+      
+      auto authorities = db.get_custom_authorities_by_account(nathan->id);
+      BOOST_REQUIRE(!authorities.empty());
+      
+      BOOST_CHECK_NO_THROW(push_transfer_operation_from_nathan_to_jack(nathan_key));
+   } catch (fc::exception &e) {
+      edump((e.to_detail_string()));
+      throw;
+   }
+}
+
 BOOST_AUTO_TEST_CASE( transaction_succeeds_with_one_restriction ) {
    try {
       eq_restriction restriction;

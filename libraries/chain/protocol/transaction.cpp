@@ -276,25 +276,22 @@ void verify_authority( const vector<operation>& ops, const flat_set<public_key_t
       for ( auto id: required_active_for_current_op )
       {
          auto custom_authes = get_custom_authorities(id);
-         if ( custom_authes.empty() )
-         {
-            //if custom athorities are absent then add account to the required list
-            //skip all custom auth checks and go to the next account
-            required_active.insert(id);
-            break;
-         }
-         
          bool operation_verified = false;
          for ( auto custom_auth: custom_authes )
          {
-            operation_verified = custom_auth.validate(op) && (s.check_authority(&custom_auth.auth) || s.check_authority(id));
+            operation_verified = custom_auth.validate(op) && s.check_authority(&custom_auth.auth);
             if ( operation_verified )
             {
                break;
             }
          }
          
-         GRAPHENE_ASSERT( operation_verified, tx_missing_custom_auth, "Missing Custom Authority for Account ${id}", ("id",id));
+         if ( !operation_verified )
+         {
+            //if custom athorities were not passed then just switch to active authorities check
+            required_active.insert(id);
+            break;
+         }
       }
    }
    s.max_recursion = max_recursion_depth;
