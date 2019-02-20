@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cryptonomex, Inc., and contributors.
+ * Copyright (c) 2018 Abit More, and contributors.
  *
  * The MIT License
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <fc/smart_ref_impl.hpp>
-#include "db_balance.cpp"
-#include "db_block.cpp"
-#include "db_debug.cpp"
-#include "db_getter.cpp"
-#include "db_init.cpp"
-#include "db_maint.cpp"
-#include "db_management.cpp"
-#include "db_market.cpp"
-#include "db_update.cpp"
-#include "db_witness_schedule.cpp"
-#include "db_notify.cpp"
-#include "db_custom_auth.cpp"
+
+#include <graphene/chain/int_from_operation_type.hpp>
+
+namespace graphene { namespace chain {
+   
+#define GRAPHENE_GENERATE_OP_TYPE_TO_ID_MAPPER(r, data, i, elem) \
+const int int_from_operation_type<elem>::value; \
+
+
+BOOST_PP_SEQ_FOR_EACH_I( GRAPHENE_GENERATE_OP_TYPE_TO_ID_MAPPER, , BOOST_PP_VARIADIC_TO_SEQ( GRAPHENE_OPERATIONS_VARIADIC ) )
+   
+#undef GRAPHENE_GENERATE_OP_TYPE_TO_ID_MAPPER
+   
+} }

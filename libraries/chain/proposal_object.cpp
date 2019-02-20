@@ -23,6 +23,7 @@
  */
 #include <graphene/chain/database.hpp>
 #include <graphene/chain/proposal_object.hpp>
+#include <graphene/chain/custom_authority_object.hpp>
 
 namespace graphene { namespace chain {
 
@@ -35,6 +36,7 @@ bool proposal_object::is_authorized_to_execute(database& db) const
                         available_key_approvals,
                         [&]( account_id_type id ){ return &id(db).active; },
                         [&]( account_id_type id ){ return &id(db).owner;  },
+                        [&]( account_id_type id ){ return std::vector<custom_authority_object>{}; },
                         db.get_global_properties().parameters.max_authority_depth,
                         true, /* allow committeee */
                         available_active_approvals,

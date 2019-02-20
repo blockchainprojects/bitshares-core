@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cryptonomex, Inc., and contributors.
+ * Copyright (c) 2019 BitShares Core Team, and contributors.
  *
  * The MIT License
  *
@@ -21,16 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <fc/smart_ref_impl.hpp>
-#include "db_balance.cpp"
-#include "db_block.cpp"
-#include "db_debug.cpp"
-#include "db_getter.cpp"
-#include "db_init.cpp"
-#include "db_maint.cpp"
-#include "db_management.cpp"
-#include "db_market.cpp"
-#include "db_update.cpp"
-#include "db_witness_schedule.cpp"
-#include "db_notify.cpp"
-#include "db_custom_auth.cpp"
+
+#include <graphene/chain/database.hpp>
+
+#include <graphene/chain/custom_authority_object.hpp>
+#include <graphene/chain/exceptions.hpp>
+
+namespace graphene { namespace chain {
+
+vector< custom_authority_object > database::get_custom_authorities_by_account( account_id_type account ) const
+{
+   const auto& authority_by_account = get_index_type<custom_authority_index>().indices().get<by_account>();
+   auto authority_for_account_range = authority_by_account.equal_range(account);
+    
+   return vector<custom_authority_object>(authority_for_account_range.first, authority_for_account_range.second);
+}
+
+} }

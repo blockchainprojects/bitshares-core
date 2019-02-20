@@ -32,37 +32,9 @@ namespace graphene { namespace chain {
 
 void_result custom_authority_create_evaluator::do_evaluate(const custom_authority_create_operation& op)
 { try {
-   const database& d = db();
-
-   // account is fee payer so should be valid
-
-   // custom_id should be unique per account
-
-   // valid_from ?
-   // valid_to should not be too far in the future
-
-   // operation_type HF check
-
-   // if there is an account in auth, need to be valid
-
-   // restrictions size check? global limitation?
-
-   // how many custom authorities per account?
-
-/*
-      asset                           fee;
-      account_id_type                 account;
-      uint32_t                        custom_id;
-      bool                            enabled;
-      time_point_sec                  valid_from;
-      time_point_sec                  valid_to;
-      unsigned_int                    operation_type;
-      authority                       auth;
-      vector<restriction>             restrictions;
-
-      empty_extensions_type           extensions;
-*/
-
+   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
+             "custom_authority_create_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
@@ -72,12 +44,11 @@ object_id_type custom_authority_create_evaluator::do_apply(const custom_authorit
 
    const auto& new_object = d.create<custom_authority_object>( [&op]( custom_authority_object& obj ){
       obj.account        = op.account;
-      obj.custom_id      = op.custom_id;
+      obj.auth           = op.auth;
       obj.enabled        = op.enabled;
       obj.valid_from     = op.valid_from;
       obj.valid_to       = op.valid_to;
       obj.operation_type = op.operation_type;
-      obj.auth           = op.auth;
       obj.restrictions   = op.restrictions;
    });
 
@@ -87,28 +58,66 @@ object_id_type custom_authority_create_evaluator::do_apply(const custom_authorit
 
 void_result custom_authority_update_evaluator::do_evaluate(const custom_authority_update_operation& op)
 { try {
-   const database& d = db();
-
+   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
+             "custom_authority_update_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   
+   //check if object exists
+   db().get<custom_authority_object>(op.custom_authority_to_update);
+   
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
 void_result custom_authority_update_evaluator::do_apply(const custom_authority_update_operation& op)
 { try {
    database& d = db();
-
+   
+   d.modify( d.get<custom_authority_object>(op.custom_authority_to_update), [&]( custom_authority_object& obj ){
+      
+      if (op.auth)
+      {
+         obj.auth = *op.auth;
+      }
+      
+      if (op.enabled)
+      {
+         obj.enabled = *op.enabled;
+      }
+      
+      if (op.valid_to)
+      {
+         obj.valid_to = *op.valid_to;
+      }
+      
+      if (op.operation_type)
+      {
+         obj.operation_type = *op.operation_type;
+      }
+      
+      if (op.restrictions)
+      {
+         obj.restrictions = *op.restrictions;
+      }
+   });
+   
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
 void_result custom_authority_delete_evaluator::do_evaluate(const custom_authority_delete_operation& op)
 { try {
-   const database& d = db();
-
+   FC_ASSERT(db().head_block_time() > HARDFORK_CORE_1285_TIME,
+             "custom_authority_delete_operation should not be executed before HARDFORK_CORE_1285_TIME");
+   
+   //check if object exists
+   db().get<custom_authority_object>(op.custom_authority_to_delete);
+   
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
 void_result custom_authority_delete_evaluator::do_apply(const custom_authority_delete_operation& op)
 { try {
    database& d = db();
+
+   d.remove(d.get<custom_authority_object>(op.custom_authority_to_delete));
 
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }

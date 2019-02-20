@@ -25,6 +25,7 @@
 
 #include <graphene/app/api.hpp>
 #include <graphene/utilities/key_conversion.hpp>
+#include <graphene/chain/custom_authority_object.hpp>
 
 using namespace graphene::app;
 using namespace graphene::chain;
@@ -831,6 +832,58 @@ class wallet_api
                                                        string registrar_account,
                                                        string referrer_account,
                                                        bool broadcast = false);
+   
+      /**
+       * Creates custom authority object bound to specified account
+       *
+       * @param account the id of the account to bind custom authority to
+       * @param operation_type id of the operation type to create custom authority for
+       * @param valid_from time point since what authority is valid
+       * @param valid_to time point till what authority is valid
+       * @param restrictions restrictions list for operation arguments
+       * @returns the signed transaction creating custom authority
+       */
+      signed_transaction create_custom_authority(account_id_type account,
+                                                 authority auth,
+                                                 int operation_type,
+                                                 time_point_sec valid_from,
+                                                 time_point_sec valid_to,
+                                                 vector<restriction> restrictions);
+   
+      /**
+       * Lists custom authorities bound to specified account
+       *
+       * @param account the id of the account to list custom authorities for
+       * @returns list of custom authorities bound to account
+       */
+      vector<custom_authority_object> list_custom_authorities(account_id_type account);
+   
+      /**
+       * Updates custom authority specified y id
+       *
+       * @param auth id of the authority to update
+       * @param operation_type id of the operation type to create custom authority for
+       * @param enabled flag specifing if the authority is enabled or not
+       * @param valid_from time point since what authority is valid
+       * @param valid_to time point till what authority is valid
+       * @param restrictions restrictions list for operation arguments
+       * @returns the signed transaction updating custom authority
+       */
+      signed_transaction update_custom_authority(object_id_type custom_auth,
+                                                 optional<authority> auth,
+                                                 optional<unsigned_int> operation_type,
+                                                 optional<bool> enabled,
+                                                 optional<time_point_sec> valid_from,
+                                                 optional<vector<restriction>> restrictions);
+   
+      /**
+       * Deletes custom authority specified by id
+       *
+       * @param auth id of the authority to delete
+       * @returns the signed transaction deleting custom authority
+       */
+      signed_transaction delete_custom_authority(object_id_type auth);
+    
 
       /** Transfer an amount from one account to another.
        * @param from the name or id of the account sending the funds
@@ -1766,6 +1819,10 @@ FC_API( graphene::wallet::wallet_api,
         (register_account)
         (upgrade_account)
         (create_account_with_brain_key)
+        (create_custom_authority)
+        (list_custom_authorities)
+        (update_custom_authority)
+        (delete_custom_authority)
         (sell_asset)
         (borrow_asset)
         (borrow_asset_ext)

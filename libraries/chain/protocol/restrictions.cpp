@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cryptonomex, Inc., and contributors.
+ * Copyright (c) 2018 Abit More, and contributors.
  *
  * The MIT License
  *
@@ -21,16 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <fc/smart_ref_impl.hpp>
-#include "db_balance.cpp"
-#include "db_block.cpp"
-#include "db_debug.cpp"
-#include "db_getter.cpp"
-#include "db_init.cpp"
-#include "db_maint.cpp"
-#include "db_management.cpp"
-#include "db_market.cpp"
-#include "db_update.cpp"
-#include "db_witness_schedule.cpp"
-#include "db_notify.cpp"
-#include "db_custom_auth.cpp"
+
+#include <graphene/chain/protocol/restrictions.hpp>
+
+#include <graphene/chain/protocol/base.hpp>
+#include <graphene/chain/custom_authorities_utils.hpp>
+
+namespace graphene { namespace chain {
+
+uint64_t attribute_assert_restriction::get_units() const
+{
+   uint64_t result = 0;
+   for ( auto& rest: restrictions )
+   {
+      units_fetcher visitor;
+      result += rest.rest.visit(visitor);
+   }
+   
+   return result;
+}
+
+} } 

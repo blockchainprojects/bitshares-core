@@ -166,6 +166,9 @@ class database_api_impl : public std::enable_shared_from_this<database_api_impl>
       // Withdrawals
       vector<withdraw_permission_object> get_withdraw_permissions_by_giver(const std::string account_id_or_name, withdraw_permission_id_type start, uint32_t limit)const;
       vector<withdraw_permission_object> get_withdraw_permissions_by_recipient(const std::string account_id_or_name, withdraw_permission_id_type start, uint32_t limit)const;
+   
+      //Custom authorities
+      vector<custom_authority_object> get_custom_authorities_by_account(const std::string account_id_or_name)const;
 
    //private:
       static string price_to_string( const price& _price, const asset_object& _base, const asset_object& _quote );
@@ -2095,7 +2098,18 @@ vector< fc::variant > database_api::get_required_fees( const vector<operation>& 
 {
    return my->get_required_fees( ops, id );
 }
+   
+vector< custom_authority_object > database_api::get_custom_authorities_by_account( const std::string account_id_or_name )const
+{
+   return my->get_custom_authorities_by_account(account_id_or_name);
+}
 
+vector< custom_authority_object > database_api_impl::get_custom_authorities_by_account( const std::string account_id_or_name )const
+{
+   auto account_id = get_account_from_string(account_id_or_name)->id;
+   return _db.get_custom_authorities_by_account(account_id);
+}
+   
 /**
  * Container method for mutually recursive functions used to
  * implement get_required_fees() with potentially nested proposals.

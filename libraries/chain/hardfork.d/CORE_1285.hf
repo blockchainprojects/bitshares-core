@@ -1,0 +1,4 @@
+// bitshares-core issue #1285 Custom authorities
+#ifndef HARDFORK_CORE_1285_TIME
+#define HARDFORK_CORE_1285_TIME (fc::time_point_sec( 0 )) // temporary date, just to integrate hardfork logic to the custom authorities feature
+#endif

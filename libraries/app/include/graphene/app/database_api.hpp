@@ -40,6 +40,7 @@
 #include <graphene/chain/proposal_object.hpp>
 #include <graphene/chain/worker_object.hpp>
 #include <graphene/chain/witness_object.hpp>
+#include <graphene/chain/custom_authority_object.hpp>
 
 #include <graphene/market_history/market_history_plugin.hpp>
 
@@ -717,6 +718,13 @@ class database_api
        *  @return Withdraw permission objects for the account
        */
       vector<withdraw_permission_object> get_withdraw_permissions_by_recipient(const std::string account_id_or_name, withdraw_permission_id_type start, uint32_t limit)const;
+   
+      /**
+       *  @brief Get custom authorities objects for account id.
+       *  @param account Account ID or name to get objects from
+       *  @return Custom authorities objects for the account
+       */
+      vector<custom_authority_object> get_custom_authorities_by_account(const std::string account_id_or_name)const;
 
    private:
       std::shared_ptr< database_api_impl > my;
@@ -838,5 +846,5 @@ FC_API(graphene::app::database_api,
    // Withdrawals
    (get_withdraw_permissions_by_giver)
    (get_withdraw_permissions_by_recipient)
-
+   (get_custom_authorities_by_account)
 )

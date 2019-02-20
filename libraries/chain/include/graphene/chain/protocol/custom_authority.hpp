@@ -23,7 +23,7 @@
  */
 #pragma once
 #include <graphene/chain/protocol/base.hpp>
-#include <graphene/chain/protocol/restriction.hpp>
+#include <graphene/chain/protocol/restrictions.hpp>
 
 namespace graphene { namespace chain {
 
@@ -39,17 +39,16 @@ namespace graphene { namespace chain {
          uint32_t price_per_k_unit = 100; ///< units = valid seconds * items in auth * items in restrictions
       };
 
-      asset                           fee; // TODO: defer fee to expiration / update / removal ?
-      account_id_type                 account;
-      uint32_t                        custom_id;
-      bool                            enabled;
-      time_point_sec                  valid_from;
-      time_point_sec                  valid_to;
-      unsigned_int                    operation_type;
-      authority                       auth;
-      vector<restriction>             restrictions;
+      asset fee;
+      account_id_type account;
+      authority auth;
+      bool enabled;
+      time_point_sec valid_from;
+      time_point_sec valid_to;
+      unsigned_int operation_type;
+      vector<restriction> restrictions;
 
-      empty_extensions_type           extensions;
+      empty_extensions_type extensions;
 
       account_id_type fee_payer()const { return account; }
       void            validate()const;
@@ -68,12 +67,23 @@ namespace graphene { namespace chain {
          uint32_t price_per_k_unit = 100; ///< units = valid seconds * items in auth * items in restrictions
       };
 
-      asset             fee;
-      account_id_type   account;
-      uint64_t          delta_units; // to calculate fee, it will be validated in evaluator
-                                     // Note: if start was in the past, when updating, used fee should be deducted
+      object_id_type custom_authority_to_update;
+      
+      asset fee;
+      account_id_type fee_paying_account;
+      
+      optional<authority> auth;
+      optional<bool> enabled;
+      optional<time_point_sec> valid_to;
+      optional<unsigned_int> operation_type;
+      optional<vector<restriction>> restrictions;
+      
+      uint64_t delta_units; // to calculate fee, it will be validated in evaluator
+                            // Note: if start was in the past, when updating, used fee should be deducted
+      
+      empty_extensions_type extensions;
 
-      account_id_type fee_payer()const { return account; }
+      account_id_type fee_payer()const { return fee_paying_account; }
       void            validate()const;
       share_type      calculate_fee(const fee_parameters_type& k)const;
    };
@@ -87,10 +97,12 @@ namespace graphene { namespace chain {
    {
       struct fee_parameters_type { uint64_t fee =  GRAPHENE_BLOCKCHAIN_PRECISION; };
 
-      asset             fee;
-      account_id_type   account;
+      object_id_type custom_authority_to_delete;
+      
+      asset fee;
+      account_id_type fee_paying_account;
 
-      account_id_type fee_payer()const { return account; }
+      account_id_type fee_payer()const { return fee_paying_account; }
       void            validate()const;
    };
 
@@ -103,15 +115,29 @@ FC_REFLECT( graphene::chain::custom_authority_delete_operation::fee_parameters_t
 FC_REFLECT( graphene::chain::custom_authority_create_operation,
             (fee)
             (account)
-            (custom_id)
+            (auth)
             (enabled)
             (valid_from)
             (valid_to)
             (operation_type)
-            (auth)
             (restrictions)
             (extensions)
           )
 
-FC_REFLECT( graphene::chain::custom_authority_update_operation, (fee)(account) )
-FC_REFLECT( graphene::chain::custom_authority_delete_operation, (fee)(account) )
+FC_REFLECT( graphene::chain::custom_authority_update_operation,
+            (fee)
+            (custom_authority_to_update)
+            (fee_paying_account)
+            (auth)
+            (enabled)
+            (valid_to)
+            (operation_type)
+            (restrictions)
+            (extensions)
+           )
+
+FC_REFLECT( graphene::chain::custom_authority_delete_operation,
+            (fee)
+            (custom_authority_to_delete)
+            (fee_paying_account)
+           )

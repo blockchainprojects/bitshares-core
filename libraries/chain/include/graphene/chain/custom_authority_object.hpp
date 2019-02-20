@@ -24,6 +24,7 @@
 #pragma once
 #include <graphene/chain/protocol/authority.hpp>
 #include <graphene/chain/protocol/custom_authority.hpp>
+#include <graphene/chain/protocol/operations.hpp>
 #include <graphene/db/generic_index.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
@@ -41,16 +42,18 @@ namespace graphene { namespace chain {
          static const uint8_t type_id  = impl_custom_authority_object_type;
 
          account_id_type                 account;
-         uint32_t                        custom_id;
          bool                            enabled;
          time_point_sec                  valid_from;
          time_point_sec                  valid_to;
          unsigned_int                    operation_type;
          authority                       auth;
-         vector<restriction>             restrictions;
+         vector<restriction>          restrictions;
+       
+         bool validate(const operation& an_operation, const time_point_sec now) const;
+         bool validate(const operation& an_operation) const; 
    };
 
-   struct by_account_custom;
+   struct by_account;
 
    /**
     * @ingroup object_index
@@ -58,13 +61,14 @@ namespace graphene { namespace chain {
    typedef multi_index_container<
       custom_authority_object,
       indexed_by<
-         ordered_unique< tag<by_id>, member< object, object_id_type, &object::id > >,
-         ordered_unique< tag<by_account_custom>,
-            composite_key<
-               custom_authority_object,
-               member<custom_authority_object, account_id_type, &custom_authority_object::account>,
-               member<custom_authority_object, uint32_t, &custom_authority_object::custom_id>
-            >
+         ordered_unique< tag< by_id >,
+                         member< object, object_id_type, &object::id > >,
+         ordered_unique< tag< by_account >,
+                         composite_key< custom_authority_object,
+                                        member< custom_authority_object,
+                                                account_id_type,
+                                                &custom_authority_object::account >,
+                                        member< object, object_id_type, &object::id > >
          >
       >
    > custom_authority_multi_index_type;
@@ -79,7 +83,6 @@ namespace graphene { namespace chain {
 FC_REFLECT_DERIVED( graphene::chain::custom_authority_object,
                     (graphene::db::object),
                     (account)
-                    (custom_id)
                     (enabled)
                     (valid_from)
                     (valid_to)

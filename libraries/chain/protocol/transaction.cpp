@@ -24,6 +24,7 @@
 #include <graphene/chain/exceptions.hpp>
 #include <graphene/chain/protocol/fee_schedule.hpp>
 #include <graphene/chain/protocol/block.hpp>
+#include <graphene/chain/custom_authority_object.hpp>
 #include <fc/io/raw.hpp>
 #include <fc/bitutil.hpp>
 #include <fc/smart_ref_impl.hpp>
@@ -251,6 +252,7 @@ struct sign_state
 void verify_authority( const vector<operation>& ops, const flat_set<public_key_type>& sigs,
                        const std::function<const authority*(account_id_type)>& get_active,
                        const std::function<const authority*(account_id_type)>& get_owner,
+                       const std::function<const std::vector<custom_authority_object>(account_id_type)>& get_custom_authorities,
                        uint32_t max_recursion_depth,
                        bool  allow_committe,
                        const flat_set<account_id_type>& active_aprovals,
@@ -259,18 +261,43 @@ void verify_authority( const vector<operation>& ops, const flat_set<public_key_t
    flat_set<account_id_type> required_active;
    flat_set<account_id_type> required_owner;
    vector<authority> other;
-
-   for( const auto& op : ops )
-      operation_get_required_authorities( op, required_active, required_owner, other );
-
+   
    if( !allow_committe )
       GRAPHENE_ASSERT( required_active.find(GRAPHENE_COMMITTEE_ACCOUNT) == required_active.end(),
-                       invalid_committee_approval, "Committee account may only propose transactions" );
-
+                      invalid_committee_approval, "Committee account may only propose transactions" );
+   
    sign_state s(sigs,get_active);
+
+   for( const auto& op : ops )
+   {
+      flat_set<account_id_type> required_active_for_current_op;
+      operation_get_required_authorities( op, required_active_for_current_op, required_owner, other );
+      
+      for ( auto id: required_active_for_current_op )
+      {
+         auto custom_authes = get_custom_authorities(id);
+         bool operation_verified = false;
+         for ( auto custom_auth: custom_authes )
+         {
+            operation_verified = custom_auth.validate(op) && s.check_authority(&custom_auth.auth);
+            if ( operation_verified )
+            {
+               break;
+            }
+         }
+         
+         if ( !operation_verified )
+         {
+            //if custom athorities were not passed then just switch to active authorities check
+            required_active.insert(id);
+            break;
+         }
+      }
+   }
    s.max_recursion = max_recursion_depth;
    for( auto& id : active_aprovals )
       s.approved_by.insert( id );
+   
    for( auto& id : owner_approvals )
       s.approved_by.insert( id );
 
@@ -375,7 +402,8 @@ set<public_key_type> signed_transaction::minimize_required_signatures(
       result.erase( k );
       try
       {
-         graphene::chain::verify_authority( operations, result, get_active, get_owner, max_recursion );
+         auto get_custom_authorities = [](account_id_type){ return std::vector<custom_authority_object>{}; };
+         graphene::chain::verify_authority( operations, result, get_active, get_owner, get_custom_authorities, max_recursion );
          continue;  // element stays erased if verify_authority is ok
       }
       catch( const tx_missing_owner_auth& e ) {}
@@ -391,8 +419,20 @@ void signed_transaction::verify_authority(
    const std::function<const authority*(account_id_type)>& get_active,
    const std::function<const authority*(account_id_type)>& get_owner,
    uint32_t max_recursion )const
-{ try {
-   graphene::chain::verify_authority( operations, get_signature_keys( chain_id ), get_active, get_owner, max_recursion );
-} FC_CAPTURE_AND_RETHROW( (*this) ) }
+{
+   verify_authority(chain_id, get_active, get_owner,
+                    [](account_id_type) { return std::vector<custom_authority_object>(); },
+                    max_recursion);
+}
 
+void signed_transaction::verify_authority(
+                                          const chain_id_type& chain_id,
+                                          const std::function<const authority*(account_id_type)>& get_active,
+                                          const std::function<const authority*(account_id_type)>& get_owner,
+                                          const std::function<const std::vector<custom_authority_object>(account_id_type)>& get_custom_authorities,
+                                          uint32_t max_recursion )const
+{ try {
+   graphene::chain::verify_authority( operations, get_signature_keys( chain_id ), get_active, get_owner, get_custom_authorities, max_recursion );
+} FC_CAPTURE_AND_RETHROW( (*this) ) }
+   
 } } // graphene::chain

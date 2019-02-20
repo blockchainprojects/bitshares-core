@@ -34,12 +34,29 @@
 #include <graphene/chain/internal_exceptions.hpp>
 #include <graphene/chain/special_authority.hpp>
 #include <graphene/chain/special_authority_object.hpp>
+#include <graphene/chain/custom_authority_object.hpp>
 #include <graphene/chain/witness_object.hpp>
 #include <graphene/chain/worker_object.hpp>
 
 #include <algorithm>
 
 namespace graphene { namespace chain {
+   
+namespace {
+void disable_account_custom_authorities( database& db, const account_id_type& account )
+{
+   const auto& authority_by_account = db.get_index_type<custom_authority_index>().indices().get<by_account>();
+   auto authority_for_account_range = authority_by_account.equal_range(account);
+    
+   for (auto& custom_authority: boost::make_iterator_range(authority_for_account_range.first,
+                                                           authority_for_account_range.second))
+   {
+      db.modify( custom_authority, []( custom_authority_object& obj ){
+         obj.enabled = false;
+      });
+   }
+}
+}
 
 void verify_authority_accounts( const database& db, const authority& a )
 {
@@ -118,7 +135,6 @@ void verify_account_votes( const database& db, const account_options& options )
       }
    }
 }
-
 
 void_result account_create_evaluator::do_evaluate( const account_create_operation& op )
 { try {
@@ -366,6 +382,14 @@ void_result account_update_evaluator::do_apply( const account_update_operation& 
       {
          sa.account = o.account;
       } );
+   }
+   
+   //custom authorities should be disabled when active authority of the account is updated
+   //according to https://github.com/bitshares/bsips/blob/master/bsip-0040.md#modification-to-the-backend
+   bool custom_authorities_should_be_disabled = o.active.valid();
+   if( custom_authorities_should_be_disabled && d.head_block_time() > HARDFORK_CORE_1285_TIME )
+   {
+      disable_account_custom_authorities(d, o.account);
    }
 
    return void_result();

@@ -29,6 +29,7 @@
 #include <graphene/chain/block_summary_object.hpp>
 #include <graphene/chain/global_property_object.hpp>
 #include <graphene/chain/operation_history_object.hpp>
+#include <graphene/chain/custom_authority_object.hpp>
 
 #include <graphene/chain/proposal_object.hpp>
 #include <graphene/chain/transaction_object.hpp>
@@ -41,6 +42,36 @@
 
 namespace graphene { namespace chain {
 
+namespace {
+   vector< custom_authority_object > filter_enabled_custom_authorities( const vector< custom_authority_object >& custom_authorities )
+   {
+      vector< custom_authority_object > result;
+      for (auto& auth: custom_authorities)
+      {
+         if (auth.enabled)
+         {
+            result.emplace_back(auth);
+         }
+      }
+      
+      return result;
+   }
+   
+   vector< custom_authority_object > filter_valid_custom_authorities( const vector< custom_authority_object >& custom_authorities, fc::time_point_sec now )
+   {
+      vector< custom_authority_object > result;
+      for ( auto& auth: custom_authorities )
+      {
+         if ( auth.valid_from < now && now < auth.valid_to )
+         {
+            result.emplace_back(auth);
+         }
+      }
+      
+      return result;
+   }
+}
+   
 bool database::is_known_block( const block_id_type& id )const
 {
    return _fork_db.is_known_block(id) || _block_id_to_block.contains(id);
@@ -605,8 +636,6 @@ void database::_apply_block( const signed_block& next_block )
    notify_changed_objects();
 } FC_CAPTURE_AND_RETHROW( (next_block.block_num()) )  }
 
-
-
 processed_transaction database::apply_transaction(const signed_transaction& trx, uint32_t skip)
 {
    processed_transaction result;
@@ -632,12 +661,30 @@ processed_transaction database::_apply_transaction(const signed_transaction& trx
    transaction_evaluation_state eval_state(this);
    const chain_parameters& chain_parameters = get_global_properties().parameters;
    eval_state._trx = &trx;
-
+   
    if( !(skip & (skip_transaction_signatures | skip_authority_check) ) )
    {
       auto get_active = [&]( account_id_type id ) { return &id(*this).active; };
       auto get_owner  = [&]( account_id_type id ) { return &id(*this).owner;  };
-      trx.verify_authority( chain_id, get_active, get_owner, get_global_properties().parameters.max_authority_depth );
+      auto get_custom_authorities = [&]( account_id_type id ) -> std::vector<custom_authority_object>
+         {
+            if ( head_block_time() > HARDFORK_CORE_1285_TIME )
+            {
+               auto custom_auths = get_custom_authorities_by_account(id);
+               auto enabled_authorities = filter_enabled_custom_authorities(custom_auths);
+               auto valid_authorities = filter_valid_custom_authorities(enabled_authorities, head_block_time());
+               
+               return valid_authorities;
+            }
+            
+            return {};
+         };
+      
+      trx.verify_authority( chain_id,
+                            get_active,
+                            get_owner,
+                            get_custom_authorities,
+                            get_global_properties().parameters.max_authority_depth );
    }
 
    //Skip all manner of expiration and TaPoS checking if we're on block 1; It's impossible that the transaction is
