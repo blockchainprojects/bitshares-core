@@ -84,7 +84,7 @@ add_library( graphene_chain
              buyback.cpp
              custom_authority_evaluator.cpp
              custom_authority_object.cpp
-             operation_type_to_id.cpp
+             int_from_operation_type.cpp
 
              account_object.cpp
              asset_object.cpp
