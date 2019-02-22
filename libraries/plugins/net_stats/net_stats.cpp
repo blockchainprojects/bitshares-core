@@ -58,8 +58,8 @@ public:
                                     .Labels( {} )
                                     .Register( *registry );
 
-            msg_rx_size_hsg = &msg_size_hsg_fam.Add( { {"type", "rx"} } );
-            msg_tx_size_hsg = &msg_size_hsg_fam.Add( { {"type", "tx"} } );
+            msg_rx_size_hsg = &msg_size_hsg_fam.Add( { {"type", "rx"} }, std::vector<double>(0.0) );
+            msg_tx_size_hsg = &msg_size_hsg_fam.Add( { {"type", "tx"} }, std::vector<double>(0.0) );
 
             exposer->RegisterCollectable( registry );
         }
