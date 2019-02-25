@@ -517,6 +517,7 @@ bool application_impl::handle_block(const graphene::net::block_message& blk_msg,
            ("i",last_irr)("d",blk_msg.block.block_num()-last_irr) );
    }
    FC_ASSERT( (latency.count()/1000) > -5000, "Rejecting block with timestamp in the future" );
+   _self->block_handled( latency.count() );
 
    try {
       const uint32_t skip = (_is_block_producer | _force_validate) ?
