@@ -79,8 +79,7 @@ public:
                                                         .Register( *registry );
             
             prometheus::Histogram::BucketBoundaries block_latency_boundaries;
-            // TODO choose better buckets testnet buckts are calculated with .now() == ~2016
-            for( double bucket = 71000000000.0; bucket < 82000000000.0; bucket += 500000000.0 )
+            for( double bucket = 0.0; bucket < 10000; bucket += 500 )
                 block_latency_boundaries.push_back( bucket );
 
             block_latency_hsg = &block_latency_hsg_fam.Add( {}, block_latency_boundaries );
@@ -121,7 +120,11 @@ public:
 
     void on_block_handled( int64_t block_latency ) 
     {
-        block_latency_hsg->Observe( block_latency );
+        // to not publish block_latency while in sync mode
+        static const int64_t MAX_LATENCY = 5 * 60 * 1000;
+        
+        if( block_latency >= MAX_LATENCY )
+            block_latency_hsg->Observe( block_latency );
     }
 
 private:
