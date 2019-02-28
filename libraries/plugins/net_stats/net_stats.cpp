@@ -41,8 +41,6 @@ public:
     net_stats_impl(net_stats_plugin& _plugin)
         : _self(_plugin) 
         {
-            // TODO ipaddr and port not static?
-            exposer  = std::make_shared<prometheus::Exposer>( "127.0.0.1:8080" );
             registry = std::make_shared<prometheus::Registry>();
 
 
@@ -82,11 +80,7 @@ public:
             for( double bucket = 0.0; bucket < 10000; bucket += 500 )
                 block_latency_boundaries.push_back( bucket );
 
-            block_latency_hsg = &block_latency_hsg_fam.Add( {}, block_latency_boundaries );
-            
-
-
-            exposer->RegisterCollectable( registry );
+            block_latency_hsg = &block_latency_hsg_fam.Add( {}, block_latency_boundaries );            
         }
     ~net_stats_impl() = default;
 
@@ -127,11 +121,12 @@ public:
             block_latency_hsg->Observe( block_latency );
     }
 
-private:
+    std::string exposer_endpoint = "127.0.0.1:8080";
     // http server to expose prometheus metrics
     std::shared_ptr<prometheus::Exposer> exposer;
     // registry for all metric types
     std::shared_ptr<prometheus::Registry> registry;
+private:
     // p2p received message counter
     prometheus::Counter* msg_rx_cnt;
     // p2p transmitted message counter
@@ -161,10 +156,20 @@ std::string net_stats_plugin::plugin_description()const {
 
 void net_stats_plugin::plugin_set_program_options(boost::program_options::options_description& cli,
                                                   boost::program_options::options_description& cfg) {
-//    cli.add_options()
-//            ("net_stats_option", boost::program_options::value<std::string>(), "net_stats option")
-//            ;
-//    cfg.add(cli);
+    cli.add_options()
+         ("net-stats-exposer-endpoint", boost::program_options::value<std::string>(),
+                "net stats metric exposer endpoint (default 127.0.0.1:8080)");
+
+    cfg.add(cli);
+}
+
+void net_stats_plugin::plugin_initialize(const boost::program_options::variables_map& options)
+{
+   if( options.count( "net-stats-exposer-endpoint" ) ) {
+      my->exposer_endpoint = options["net-stats-exposer-endpoint"].as<std::string>();
+   }
+   my->exposer = std::make_shared<prometheus::Exposer>( my->exposer_endpoint );
+   my->exposer->RegisterCollectable( my->registry );
 }
 
 void net_stats_plugin::plugin_startup() {
