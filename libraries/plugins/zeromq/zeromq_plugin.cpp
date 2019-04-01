@@ -86,7 +86,8 @@ bool zeromq_plugin_impl::update_account_histories( const signed_block& b )
    graphene::chain::database& db = database();
    const vector<optional< operation_history_object > >& hist = db.get_applied_operations();
    bool is_first = true;
-   auto skip_oho_id = [&is_first,&db,this]() {
+   auto skip_oho_id = [&is_first,&db,this]() 
+   {
       if( is_first && db._undo_db.enabled() ) // this ensures that the current id is rolled back on undo
       {
          db.remove( db.create<operation_history_object>( []( operation_history_object& obj) {} ) );
@@ -95,7 +96,9 @@ bool zeromq_plugin_impl::update_account_histories( const signed_block& b )
       else
          _oho_index->use_next_id();
    };
-   for( const optional< operation_history_object >& o_op : hist ) {
+
+   for( const optional< operation_history_object >& o_op : hist ) 
+   {
       optional <operation_history_object> oho;
 
       auto create_oho = [&]() {
