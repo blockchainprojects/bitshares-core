@@ -41,7 +41,7 @@
 #include <fc/crypto/digest.hpp>
 
 #include "../common/database_fixture.hpp"
-
+#include <graphene/zeromq/zeromq_plugin.hpp>
 using namespace graphene::chain;
 using namespace graphene::chain::test;
 
@@ -2355,6 +2355,35 @@ BOOST_AUTO_TEST_CASE( vesting_balance_withdraw_test )
       FC_ASSERT( db.get_balance( alice_account,       core ).amount == 1000000 );
    }
    // TODO:  Test with non-core asset and Bob account
+} FC_LOG_AND_RETHROW() }
+
+BOOST_AUTO_TEST_CASE( zeromq )
+{ try {
+
+   ACTORS( (alice) (bob) );
+   transfer( committee_account, alice_id, asset(10000) );
+   transfer( committee_account, bob_id, asset(10000) );
+   generate_block();
+
+   try {
+      app.register_plugin<graphene::zeromq::zeromq_plugin>();
+      app.startup_plugins();
+   } catch( fc::exception &e ) {
+      edump( (e.to_detail_string() ) );
+   }
+
+   
+   transfer( alice, bob, asset(1) );
+   generate_block();
+
+   transfer( alice, bob, asset(2) );
+   transfer( bob, alice, asset(3) );
+   generate_block();
+
+   transfer( alice, bob, asset(4) );
+   transfer( alice, bob, asset(5) );
+   generate_block();
+
 } FC_LOG_AND_RETHROW() }
 
 // TODO:  Write linear VBO tests
