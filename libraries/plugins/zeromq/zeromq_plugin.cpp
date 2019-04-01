@@ -314,10 +314,16 @@ void zeromq_plugin::plugin_set_program_options(
 
 void zeromq_plugin::plugin_initialize(const boost::program_options::variables_map& options)
 {
-
    my->_oho_index = database().add_index< primary_index< operation_history_index > >();
    database().add_index< primary_index< account_transaction_history_index > >();
 
+   if (options.count("zeromq-socket")) {
+      my->_zeromq_socket = options["zeromq-socket"].as<std::string>();
+   }
+}
+
+void zeromq_plugin::plugin_startup()
+{
    ilog("Binding to ${u}", ("u", my->_zeromq_socket));
    s.bind (my->_zeromq_socket);
 
@@ -327,15 +333,6 @@ void zeromq_plugin::plugin_initialize(const boost::program_options::variables_ma
          FC_THROW_EXCEPTION(graphene::chain::plugin_exception, "Error populating ES database, we are going to keep trying.");
       }
    } );
-
-   if (options.count("zeromq-socket")) {
-      my->_zeromq_socket = options["zeromq-socket"].as<std::string>();
-   }
-}
-
-void zeromq_plugin::plugin_startup()
-{
-
 }
 
 } }
