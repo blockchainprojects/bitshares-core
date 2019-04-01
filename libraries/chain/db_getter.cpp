@@ -28,8 +28,6 @@
 #include <graphene/chain/chain_property_object.hpp>
 #include <graphene/chain/global_property_object.hpp>
 
-#include <fc/smart_ref_impl.hpp>
-
 namespace graphene { namespace chain {
 
 const asset_object& database::get_core_asset() const
@@ -59,7 +57,7 @@ const dynamic_global_property_object& database::get_dynamic_global_properties() 
 
 const fee_schedule&  database::current_fee_schedule()const
 {
-   return get_global_properties().parameters.current_fees;
+   return *get_global_properties().parameters.current_fees;
 }
 
 time_point_sec database::head_block_time()const
@@ -99,7 +97,14 @@ node_property_object& database::node_properties()
 
 uint32_t database::last_non_undoable_block_num() const
 {
-   return head_block_num() - _undo_db.size();
+   //see https://github.com/bitshares/bitshares-core/issues/377
+   /*
+   There is a case when a value of undo_db.size() is greater then head_block_num(),
+   and as result we get a wrong value for last_non_undoable_block_num.
+   To resolve it we should take into account a number of active_sessions in calculations of
+   last_non_undoable_block_num (active sessions are related to a new block which is under generation).
+   */
+   return head_block_num() - ( _undo_db.size() - _undo_db.active_sessions() );
 }
 
 const account_statistics_object& database::get_account_stats_by_owner( account_id_type owner )const
