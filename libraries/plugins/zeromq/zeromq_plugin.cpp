@@ -30,8 +30,8 @@
 #include <graphene/chain/account_evaluator.hpp>
 #include <fc/smart_ref_impl.hpp>
 
-zmq::context_t ctx;
-zmq::socket_t s(ctx, ZMQ_PUSH);
+#include <iterator>
+#include <memory>
 
 namespace graphene { namespace zeromq {
 
@@ -44,11 +44,12 @@ class zeromq_plugin_impl
       zeromq_plugin_impl(zeromq_plugin& _plugin)
          : _self( _plugin )
       {
+         _socket = std::unique_ptr<zmq::socket_t>( new zmq::socket_t(ctx, ZMQ_PUB) ); // = std::make_unique<zmq::socket_t>(  );
       }
       virtual ~zeromq_plugin_impl();
 
-      bool update_account_histories( const signed_block& b);
 
+      void on_applied_block( const signed_block& b );
 
       graphene::chain::database& database()
       {
@@ -57,49 +58,33 @@ class zeromq_plugin_impl
 
       zeromq_plugin& _self;
 
-      std::string _zeromq_socket = "tcp://127.0.0.1:5556";
-
-      send_struct zeromq_struct;
-
+      string _endpoint = "tcp://127.0.0.1:5556";
+      zmq::context_t ctx;
+      std::unique_ptr<zmq::socket_t> _socket;
+   
    private:
-
-      bool add_zeromq();
+      template<typename T>
+      bool add_zeromq( int message_type, const T& var );
 };
 
 void zeromq_plugin_impl::on_applied_block( const signed_block& b )
 {
-   edump( (b.to_string()) );
+   // TODO REMOVE ONLY FOR TEST
+   static int type = 0;
+   type = (type ? 0 : 1); 
+      
+   add_zeromq<signed_block>( type, b );
 }
 
-bool zeromq_plugin_impl::add_zeromq( const account_id_type account_id,
-                                     const optional <operation_history_object>& oho)
+template<typename T> // replace message_type with enum
+bool zeromq_plugin_impl::add_zeromq( int message_type, const T& var )
 {
-   const auto &stats_obj = getStatsObject(account_id);
-   const auto &ath = addNewEntry(stats_obj, account_id, oho);
-   growStats(stats_obj, ath);
-   cleanObjects(ath.id, account_id);
-
-   // here we have everything?
-   zeromq_struct.account_history = ath;
-   zeromq_struct.operation_history = os;
-   zeromq_struct.operation_type = op_type;
-   zeromq_struct.operation_id_num = ath.operation_id.instance.value;
-   zeromq_struct.block_data = bs;
-
-   string my_json = fc::json::to_string(zeromq_struct);
-
-   int32_t msgtype = 0;
-   int32_t msgopts = 0;
-
-   zmq::message_t message(my_json.length()+sizeof(msgtype)+sizeof(msgopts));
-   unsigned char* ptr = (unsigned char*) message.data();
-   memcpy(ptr, &msgtype, sizeof(msgtype));
-   ptr += sizeof(msgtype);
-   memcpy(ptr, &msgopts, sizeof(msgopts));
-   ptr += sizeof(msgopts);
-   memcpy(ptr, my_json.c_str(), my_json.length());
-   s.send(message);
-
+   string message = std::move( fc::to_string( message_type ) + fc::json::to_string<T>(var) + "\0");
+   edump( (message) );
+   typedef std::move_iterator<fc::string::iterator> move_iterator;
+   //zmq::message_t zmq_message( std::move(message) );
+   zmq::message_t zmq_message( move_iterator(message.begin()), move_iterator(message.end()) );
+   _socket->send( zmq_message );
    return true;
 }
 
@@ -134,7 +119,7 @@ void zeromq_plugin::plugin_set_program_options(
    )
 {
    cli.add_options()
-         ("zeromq-socket", boost::program_options::value<std::string>(), "zeromq socket (tcp://127.0.0.1:5556)")
+         ("endpoint", boost::program_options::value<std::string>(), "zeromq socket (tcp://127.0.0.1:5556)")
          ;
    cfg.add(cli);
 }
@@ -145,22 +130,18 @@ void zeromq_plugin::plugin_initialize(const boost::program_options::variables_ma
    
    
 
-   if (options.count("zeromq-socket")) {
-      my->_zeromq_socket = options["zeromq-socket"].as<std::string>();
+   if (options.count("endpoint")) {
+      my->_endpoint = options["endpoint"].as<std::string>();
    }
 }
 
 void zeromq_plugin::plugin_startup()
 {
-   ilog("Binding to ${u}", ("u", my->_zeromq_socket));
-   s.bind (my->_zeromq_socket);
+   ilog("Binding to ${u}", ("u", my->_endpoint));
+   my->_socket->bind( my->_endpoint );
 
    database().applied_block.connect( [&]( const signed_block& b) {
-      if(!my->on_applied_block(b))
-      {
-         FC_THROW_EXCEPTION(graphene::chain::plugin_exception, "Error populating ES database, we are going to keep trying.");
-      }
-   } );
+      my->on_applied_block(b); });
 }
 
 } }

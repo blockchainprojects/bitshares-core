@@ -67,31 +67,4 @@ class zeromq_plugin : public graphene::app::plugin
       std::unique_ptr<detail::zeromq_plugin_impl> my;
 };
 
-struct operation_history_struct {
-   int trx_in_block;
-   int op_in_trx;
-   operation_result operation_results;
-   int virtual_op;
-   operation op;
-};
-
-struct block_struct {
-   int block_num;
-   fc::time_point_sec block_time;
-   std::string trx_id;
-};
-
-struct send_struct {
-    account_transaction_history_object account_history;
-    operation_history_struct operation_history;
-    int operation_type;
-    int operation_id_num;
-    block_struct block_data;
-};
-
-
 } } //graphene::zeromq
-
-FC_REFLECT( graphene::zeromq::operation_history_struct, (trx_in_block)(op_in_trx)(operation_results)(virtual_op)(op) )
-FC_REFLECT( graphene::zeromq::block_struct, (block_num)(block_time)(trx_id) )
-FC_REFLECT( graphene::zeromq::send_struct, (account_history)(operation_history)(operation_type)(operation_id_num)(block_data) )
