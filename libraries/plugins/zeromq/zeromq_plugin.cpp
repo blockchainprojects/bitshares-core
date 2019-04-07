@@ -46,7 +46,7 @@ class zeromq_plugin_impl
       {
          _socket = std::unique_ptr<zmq::socket_t>( new zmq::socket_t(ctx, ZMQ_PUB) ); // = std::make_unique<zmq::socket_t>(  );
       }
-      virtual ~zeromq_plugin_impl();
+      ~zeromq_plugin_impl();
 
 
       void on_applied_block( const signed_block& b );
