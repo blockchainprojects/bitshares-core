@@ -66,21 +66,28 @@ BOOST_AUTO_TEST_CASE( demo )
    try {
       app.register_plugin<graphene::zeromq::zeromq_plugin>( true );
       app.initialize_plugins( bpo::variables_map() );
+      app.startup_plugins();
    } catch( fc::exception &e ) {
       edump( (e.to_detail_string() ) );
    }
 
    transfer( alice, bob, asset(1) );
    generate_block();
+   fc::usleep(fc::milliseconds(500)); // give zmq time to send
 
    transfer( alice, bob, asset(2) );
    transfer( bob, alice, asset(3) );
    generate_block();
+   fc::usleep(fc::milliseconds(500)); // give zmq time to send
 
    transfer( alice, bob, asset(4) );
    transfer( alice, bob, asset(5) );
    generate_block();
+   fc::usleep(fc::milliseconds(500)); // give zmq time to send
 
+   generate_block();
+   fc::usleep(fc::milliseconds(500)); // give zmq time to send
+   
 } FC_LOG_AND_RETHROW() }
 
 BOOST_AUTO_TEST_SUITE_END()
