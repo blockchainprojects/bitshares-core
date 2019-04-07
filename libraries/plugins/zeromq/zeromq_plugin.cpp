@@ -79,11 +79,12 @@ void zeromq_plugin_impl::on_applied_block( const signed_block& b )
 template<typename T> // replace message_type with enum
 bool zeromq_plugin_impl::add_zeromq( int message_type, const T& var )
 {
-   string message = std::move( fc::to_string( message_type ) + fc::json::to_string<T>(var) + "\0");
-   edump( (message) );
-   typedef std::move_iterator<fc::string::iterator> move_iterator;
-   //zmq::message_t zmq_message( std::move(message) );
-   zmq::message_t zmq_message( move_iterator(message.begin()), move_iterator(message.end()) );
+   string message( std::move( fc::to_string( message_type ) + fc::json::to_string<T>(var) + "\0") );
+   edump( (message) ); // TODO
+
+   zmq::message_t zmq_message( message.length() );
+   memcpy( zmq_message.data(), message.c_str(), message.length() );
+
    _socket->send( zmq_message );
    return true;
 }
