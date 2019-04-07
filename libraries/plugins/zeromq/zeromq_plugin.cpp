@@ -44,7 +44,7 @@ class zeromq_plugin_impl
       zeromq_plugin_impl(zeromq_plugin& _plugin)
          : _self( _plugin )
       {
-         _socket = std::unique_ptr<zmq::socket_t>( new zmq::socket_t(ctx, ZMQ_PUB) ); // = std::make_unique<zmq::socket_t>(  );
+         _socket = std::unique_ptr<zmq::socket_t>( new zmq::socket_t(ctx, ZMQ_PUB) );
       }
       ~zeromq_plugin_impl();
 
@@ -59,10 +59,11 @@ class zeromq_plugin_impl
       zeromq_plugin& _self;
 
       string _endpoint = "tcp://127.0.0.1:5556";
-      zmq::context_t ctx;
+      
       std::unique_ptr<zmq::socket_t> _socket;
-   
    private:
+      zmq::context_t _ctx;
+
       template<typename T>
       bool add_zeromq( int message_type, const T& var );
 };
