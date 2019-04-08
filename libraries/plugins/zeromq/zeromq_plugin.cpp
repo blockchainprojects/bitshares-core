@@ -44,7 +44,7 @@ class zeromq_plugin_impl
       zeromq_plugin_impl(zeromq_plugin& _plugin)
          : _self( _plugin )
       {
-         _socket = std::unique_ptr<zmq::socket_t>( new zmq::socket_t(ctx, ZMQ_PUB) );
+         _socket = std::unique_ptr<zmq::socket_t>( new zmq::socket_t(_ctx, ZMQ_PUB) );
       }
       ~zeromq_plugin_impl();
 
@@ -65,22 +65,22 @@ class zeromq_plugin_impl
       zmq::context_t _ctx;
 
       template<typename T>
-      bool add_zeromq( int message_type, const T& var );
+      bool add_zeromq( message_type msg_type, const T& var );
 };
 
 void zeromq_plugin_impl::on_applied_block( const signed_block& b )
 {
    // TODO REMOVE ONLY FOR TEST
-   static int type = 0;
-   type = (type ? 0 : 1); 
+   static message_type type = message_type::block;
+   type = (type==message_type::block ? message_type::sample : message_type::block); 
       
    add_zeromq<signed_block>( type, b );
 }
 
 template<typename T> // replace message_type with enum
-bool zeromq_plugin_impl::add_zeromq( int message_type, const T& var )
+bool zeromq_plugin_impl::add_zeromq( message_type msg_type, const T& var )
 {
-   string message( std::move( fc::to_string( message_type ) + fc::json::to_string<T>(var) + "\0") );
+   string message( std::move( fc::to_string( msg_type ) + fc::json::to_string<T>(var) + "\0" ) );
    edump( (message) ); // TODO
 
    zmq::message_t zmq_message( message.length() );

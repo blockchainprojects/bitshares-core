@@ -49,6 +49,12 @@ namespace detail
     class zeromq_plugin_impl;
 }
 
+enum message_type 
+{
+   block,
+   sample
+};
+
 class zeromq_plugin : public graphene::app::plugin
 {
    public:
