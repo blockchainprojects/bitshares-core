@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( demo )
 
    try {
       app.register_plugin<graphene::zeromq::zeromq_plugin>( true );
-      app.initialize_plugins( bpo::variables_map() );
+      //app.initialize_plugins( bpo::variables_map() );
       app.startup_plugins();
    } catch( fc::exception &e ) {
       edump( (e.to_detail_string() ) );
