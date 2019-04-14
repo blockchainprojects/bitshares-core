@@ -38,19 +38,20 @@ namespace bpo = boost::program_options;
 
 struct zeromq_fixture : public database_fixture
 {
-    zeromq_fixture()
-    {
-        try 
-        {
-            app.register_plugin<zeromq_plugin>( true );
+   zeromq_fixture()
+   {
+      try 
+      {
+         app.register_plugin<zeromq_plugin>( true );
 
-            app.initialize_plugins( bpo::variables_map() ); 
-        } 
-        catch(fc::exception &e)
-        {
-            edump((e.to_detail_string() ));
-        }
-    }
+         //app.initialize_plugins( bpo::variables_map() ); 
+         app.startup_plugins();
+      } 
+      catch(fc::exception &e)
+      {
+         edump((e.to_detail_string() ));
+      }
+   }
 };
 
 BOOST_FIXTURE_TEST_SUITE( zeromq_tests, zeromq_fixture )
@@ -62,14 +63,6 @@ BOOST_AUTO_TEST_CASE( demo )
    transfer( committee_account, alice_id, asset(10000) );
    transfer( committee_account, bob_id, asset(10000) );
    generate_block();
-
-   try {
-      app.register_plugin<graphene::zeromq::zeromq_plugin>( true );
-      //app.initialize_plugins( bpo::variables_map() );
-      app.startup_plugins();
-   } catch( fc::exception &e ) {
-      edump( (e.to_detail_string() ) );
-   }
 
    transfer( alice, bob, asset(1) );
    generate_block();
