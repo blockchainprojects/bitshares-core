@@ -72,7 +72,7 @@ void zeromq_plugin_impl::on_applied_block( const signed_block& b )
 {
    // TODO REMOVE ONLY FOR TEST
    static message_type type = message_type::block;
-   type = (type==message_type::block ? message_type::sample : message_type::block); 
+   type = type==message_type::block ? message_type::sample : message_type::block; 
       
    add_zeromq<signed_block>( type, b );
 }
@@ -83,19 +83,18 @@ bool zeromq_plugin_impl::add_zeromq( message_type msg_type, const T& var )
    string type = fc::to_string( msg_type );
    string json = std::move( fc::json::to_string<T>(var) );
 
+   /*
    zmq::message_t zmq_message( type.length() + json.length() );
    auto* pmsg = (unsigned char*) zmq_message.data();
    memcpy( pmsg, type.c_str(), type.length() );
    pmsg += type.length();
-   memcpy( pmsg, json.c_str(), json.length() );
+   memcpy( pmsg, json.c_str(), json.length() + 1 );
+   */
 
-
-   //string message( std::move( fc::to_string( msg_type ) + fc::json::to_string<T>(var) + "\0" ) );
-   //edump( (message) ); // TODO
-
-   // zmq::message_t zmq_message( message.c_str(), message.length() );
-   
-   //memcpy( zmq_message.data(), message.c_str(), message.length() );
+   string message( std::move( fc::to_string( msg_type ) + fc::json::to_string<T>(var) + "\0" ) );
+   edump( (message) ); // TODO
+   zmq::message_t zmq_message( message.c_str(), message.length() );
+   memcpy( zmq_message.data(), message.c_str(), message.length() );
 
    _socket->send( zmq_message );
    return true;
