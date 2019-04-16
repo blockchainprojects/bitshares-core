@@ -64,23 +64,36 @@ BOOST_AUTO_TEST_CASE( demo )
    transfer( committee_account, bob_id, asset(10000) );
    generate_block();
 
+   auto sleep_time = fc::milliseconds(1500);
+   fc::usleep(sleep_time); // give zmq time to send
+
+   fc::usleep(sleep_time); // give zmq time to send
+
    transfer( alice, bob, asset(1) );
    generate_block();
-   fc::usleep(fc::milliseconds(500)); // give zmq time to send
+   fc::usleep(sleep_time); // give zmq time to send
 
    transfer( alice, bob, asset(2) );
    transfer( bob, alice, asset(3) );
    generate_block();
-   fc::usleep(fc::milliseconds(500)); // give zmq time to send
+   fc::usleep(sleep_time); // give zmq time to send
 
    transfer( alice, bob, asset(4) );
    transfer( alice, bob, asset(5) );
    generate_block();
-   fc::usleep(fc::milliseconds(500)); // give zmq time to send
+   fc::usleep(sleep_time); // give zmq time to send
 
-   generate_block();
-   fc::usleep(fc::milliseconds(500)); // give zmq time to send
-   
+   for( int i = 0; i < 10; ++i )
+   {
+      generate_block();
+      fc::usleep(sleep_time); // give zmq time to send
+   }
+
+   while( true )
+   {
+      generate_block();
+   }
+
 } FC_LOG_AND_RETHROW() }
 
 BOOST_AUTO_TEST_SUITE_END()
