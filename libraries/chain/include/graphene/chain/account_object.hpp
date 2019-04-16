@@ -164,6 +164,8 @@ namespace graphene { namespace chain {
          account_id_type referrer;
          /// The lifetime member at the top of the referral tree. Receives a percentage of referral rewards.
          account_id_type lifetime_referrer;
+         /// The original registrar of this account, this value is set when account_upgrade_operation is performed
+         optional<account_id_type> original_registrar;
 
          /// Percentage of fee which should go to network.
          uint16_t network_fee_percentage = GRAPHENE_DEFAULT_NETWORK_PERCENT_OF_FEE;
@@ -438,6 +440,7 @@ FC_REFLECT_DERIVED( graphene::chain::account_object,
                     (owner_special_authority)(active_special_authority)
                     (top_n_control_flags)
                     (allowed_assets)
+                    (original_registrar)
                     )
 
 FC_REFLECT_DERIVED( graphene::chain::account_balance_object,
