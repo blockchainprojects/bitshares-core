@@ -91,7 +91,7 @@ bool zeromq_plugin_impl::add_zeromq( message_type msg_type, const T& var )
    memcpy( pmsg, json.c_str(), json.length() + 1 );
    */
 
-   string message( std::move( fc::to_string( msg_type ) + fc::json::to_string<T>(var) + "\0" ) );
+   string message( std::move( fc::to_string( msg_type ) + fc::json::to_string<T>(var) ) );
    edump( (message) ); // TODO
    zmq::message_t zmq_message( message.c_str(), message.length() );
    memcpy( zmq_message.data(), message.c_str(), message.length() );
