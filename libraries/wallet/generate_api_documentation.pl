@@ -3,7 +3,7 @@
 use Text::Wrap;
 use IO::File;
 
-require 'doxygen/perlmod/DoxyDocs.pm';
+require './doxygen/perlmod/DoxyDocs.pm';
 
 my($outputFileName) = @ARGV;
 die "usage: $0 output_file_name" unless $outputFileName;
@@ -16,7 +16,7 @@ my $fileHeader = <<'END';
 #include <graphene/wallet/wallet.hpp>
 
 namespace graphene { namespace wallet {
-   namespace detail 
+   namespace detail
    {
       struct api_method_name_collector_visitor
       {
@@ -29,7 +29,7 @@ namespace graphene { namespace wallet {
          }
       };
    }
-  
+
    api_documentation::api_documentation()
    {
 END
@@ -150,7 +150,7 @@ sub formatDocComment
   my $result = Text::Wrap::fill('', '', $bodyDocs);
   $result .= "\n\n" . $paramDocs if $paramDocs;
   $result .= "\n\n" . $returnDocs if $returnDocs;
-  
+
   return $result;
 }
 
