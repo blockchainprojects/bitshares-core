@@ -255,7 +255,11 @@ void application_impl::new_connection( const fc::http::websocket_connection_ptr&
       password = parts[1];
    }
 
-   login->login(username, password);
+
+   if( _self->is_plugin_enabled( "external_login_plugin" ) )
+      _self->login_attempt( username, password, *login );
+   else
+      login->login( username, password );
 }
 
 void application_impl::reset_websocket_server()
@@ -406,7 +410,7 @@ void application_impl::startup()
             modified_genesis = true;
 
             ilog(
-               "Used genesis timestamp:  ${timestamp} (PLEASE RECORD THIS)", 
+               "Used genesis timestamp:  ${timestamp} (PLEASE RECORD THIS)",
                ("timestamp", genesis.initial_timestamp.to_iso_string())
             );
          }
@@ -514,7 +518,7 @@ void application_impl::startup()
 
       fc::path api_access_file = _options->at("api-access").as<boost::filesystem::path>();
 
-      FC_ASSERT( fc::exists(api_access_file), 
+      FC_ASSERT( fc::exists(api_access_file),
             "Failed to load file from ${path}", ("path", api_access_file) );
 
       _apiaccess = fc::json::from_file( api_access_file ).as<api_access>( 20 );
