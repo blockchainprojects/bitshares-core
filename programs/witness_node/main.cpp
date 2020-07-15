@@ -36,6 +36,8 @@
 #include <graphene/api_helper_indexes/api_helper_indexes.hpp>
 #include <graphene/custom_operations/custom_operations_plugin.hpp>
 
+#include <graphene/voting_stat/voting_stat_plugin.hpp>
+
 #include <fc/thread/thread.hpp>
 #include <fc/interprocess/signals.hpp>
 #include <fc/stacktrace.hpp>
@@ -100,6 +102,8 @@ int main(int argc, char** argv) {
       auto grouped_orders_plug = node->register_plugin<grouped_orders::grouped_orders_plugin>();
       auto api_helper_indexes_plug = node->register_plugin<api_helper_indexes::api_helper_indexes>();
       auto custom_operations_plug = node->register_plugin<custom_operations::custom_operations_plugin>();
+
+      auto voting_stat_plug = node->register_plugin<voting_stat::voting_stat_plugin>();
 
       // add plugin options to config
       try
