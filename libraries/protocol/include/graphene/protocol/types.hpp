@@ -314,6 +314,8 @@ GRAPHENE_DEFINE_IDS(protocol, protocol_ids, /*protocol objects are not prefixed*
                     (htlc)
                     (custom_authority)
                     (ticket)
+                    (voting_statistics)
+                    (voteable_statistics)
                    )
 
 FC_REFLECT(graphene::protocol::public_key_type, (key_data))

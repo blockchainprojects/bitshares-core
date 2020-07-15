@@ -47,6 +47,8 @@
 #include <graphene/chain/worker_object.hpp>
 #include <graphene/chain/custom_authority_object.hpp>
 
+#include <graphene/chain/voting_statistics_object.hpp>
+
 namespace graphene { namespace chain {
 
 template<class Index>
@@ -1173,6 +1175,8 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
    distribute_fba_balances(*this);
    create_buyback_orders(*this);
 
+   on_maintenance_begin( next_block.block_num() );
+
    struct vote_tally_helper {
       database& d;
       const global_property_object& props;
@@ -1301,6 +1305,8 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
                voting_stake[2] = detail::vote_recalc_options::worker().get_recalced_voting_stake(
                                     voting_stake[2], opinion_account_stats.last_vote_time, *worker_recalc_times );
             }
+
+            d.on_voting_stake_calculated( stake_account, opinion_account, voting_stake[2] );
 
             for( vote_id_type id : opinion_account.options.votes )
             {
@@ -1442,6 +1448,8 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
    // process_budget needs to run at the bottom because
    //   it needs to know the next_maintenance_time
    process_budget();
+
+   on_maintenance_end();
 }
 
 } }
