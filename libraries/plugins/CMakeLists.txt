@@ -9,3 +9,5 @@ add_subdirectory( snapshot )
 add_subdirectory( es_objects )
 add_subdirectory( api_helper_indexes )
 add_subdirectory( custom_operations )
+
+add_subdirectory( voting_stat )
