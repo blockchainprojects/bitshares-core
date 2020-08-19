@@ -65,7 +65,7 @@ namespace graphene { namespace chain {
       /* returns the total votes of this object */
       uint64_t get_votes() const
       {
-         return boost::accumulate( voted_by | boost::adaptors::map_values, 0 );
+         return boost::accumulate( voted_by | boost::adaptors::map_values, 0ULL );
       }
    };
 
